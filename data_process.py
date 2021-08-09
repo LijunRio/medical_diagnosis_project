@@ -245,7 +245,7 @@ def process_missiing_value(df, image_folder):
     df['im2_width'] = [i[1] for i in im2_size]
 
     # save the final data to pkl file
-    df.to_pickle("../data/pickle_files/df_final.pkl")
+    df.to_pickle("../pickle_files/df_final.pkl")
     print('-' * 30)
     print('final data shape:', df.shape)
     print('after processing missing value')
@@ -387,7 +387,7 @@ if __name__ == '__main__':
     print('No2. processing missing value and save final pikle file!')
 
     # data impression
-    df_final = pd.read_pickle('../data/pickle_files/df_final.pkl')
+    df_final = pd.read_pickle('../pickle_files/df_final.pkl')
     # evaluate_height_weight(df)
     # wordcloud_analysis(df)
 
