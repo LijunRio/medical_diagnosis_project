@@ -144,28 +144,28 @@ class Dataloader(tf.keras.utils.Sequence):  # for batching
             np.random.shuffle(self.indexes)  # in-place shuffling takes place
 
 
-# if __name__ == '__main__':
-# #
-# #     # Set Hyper parameters
-#     batch_size = 100
-# #     embedding_dim = 300
-# #     dense_dim = 512
-# #     lstm_units = dense_dim
-# #     dropout_rate = 0.2
-# #
-#     # load data
-#     folder_name = './pickle_files'
-#     file_name = 'train.pkl'
-#     train = pd.read_pickle(os.path.join(folder_name, file_name))
-#     file_name = 'test.pkl'
-#     test = pd.read_pickle(os.path.join(folder_name, file_name))
+if __name__ == '__main__':
 #
-#     # DataLoader Part
-#     input_size = (224, 224)
-#     tokenizer, max_pad, *_ = tokenizing_analysis(train=train, test=test, visualising=True)
-#     print("max_pad:", max_pad)
-#     train_dataloader = Dataset(train, input_size=input_size, tokenizer=tokenizer, max_pad=max_pad)
-#     train_dataloader = Dataloader(train_dataloader, batch_size=batch_size)
+#     # Set Hyper parameters
+    batch_size = 100
+#     embedding_dim = 300
+#     dense_dim = 512
+#     lstm_units = dense_dim
+#     dropout_rate = 0.2
 #
-#     test_dataloader = Dataset(test, input_size=input_size, tokenizer=tokenizer, max_pad=max_pad)
-#     test_dataloader = Dataloader(test_dataloader, batch_size=batch_size)
+    # load data
+    folder_name = '../pickle_files'
+    file_name = 'train.pkl'
+    train = pd.read_pickle(os.path.join(folder_name, file_name))
+    file_name = 'test.pkl'
+    test = pd.read_pickle(os.path.join(folder_name, file_name))
+
+    # DataLoader Part
+    input_size = (224, 224)
+    tokenizer, max_pad, *_ = tokenizing_analysis(train=train, test=test, visualising=True)
+    print("max_pad:", max_pad)
+    train_dataloader = Dataset(train, input_size=input_size, tokenizer=tokenizer, max_pad=max_pad)
+    train_dataloader = Dataloader(train_dataloader, batch_size=batch_size)
+
+    test_dataloader = Dataset(test, input_size=input_size, tokenizer=tokenizer, max_pad=max_pad)
+    test_dataloader = Dataloader(test_dataloader, batch_size=batch_size)
