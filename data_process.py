@@ -231,8 +231,12 @@ def process_missiing_value(df, image_folder):
     im1_size = []
     im2_size = []
     for index, row in df.iterrows():
-        im1_size.append(cv2.imread(os.path.join(image_folder, row.get('image_1'))).shape[:2])
-        im2_size.append(cv2.imread(os.path.join(image_folder, row.get('image_2'))).shape[:2])
+        try:
+            im1_size.append(cv2.imread(os.path.join(image_folder, row.get('image_1'))).shape[:2])
+            im2_size.append(cv2.imread(os.path.join(image_folder, row.get('image_2'))).shape[:2])
+        except:
+            print('image1:', os.path.join(image_folder, row.get('image_1')))
+            print('image2:', os.path.join(image_folder, row.get('image_2')))
 
     df['im1_height'] = [i[0] for i in im1_size]
     df['im1_width'] = [i[1] for i in im1_size]
@@ -355,7 +359,6 @@ def split_dataset(df, folder_name):
     del df_minority_upsampled, df_minority, df_majority, df_other, df_other_downsampled
     # train.shape (4487, 8)
 
-
     file_name = 'train.pkl'
     train.to_pickle(os.path.join(folder_name, file_name))
 
@@ -390,5 +393,3 @@ if __name__ == '__main__':
     folder_name = '../pickle_files'
     split_dataset(df=df, folder_name=folder_name)
     print('No3. read final pikle file and split dataset')
-
-
