@@ -386,7 +386,7 @@ if __name__ == '__main__':
     print('No2. processing missing value and save final pikle file!')
 
     # data impression
-    df = pd.read_pickle('./df_final.pkl')
+    df = pd.read_pickle('../data/pickle_files/df_final.pkl')
     # evaluate_height_weight(df)
     # wordcloud_analysis(df)
 
