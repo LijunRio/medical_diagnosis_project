@@ -386,10 +386,10 @@ if __name__ == '__main__':
     print('No2. processing missing value and save final pikle file!')
 
     # data impression
-    df = pd.read_pickle('../data/pickle_files/df_final.pkl')
+    df_final = pd.read_pickle('../data/pickle_files/df_final.pkl')
     # evaluate_height_weight(df)
     # wordcloud_analysis(df)
 
     folder_name = '../pickle_files'
-    split_dataset(df=df, folder_name=folder_name)
+    split_dataset(df=df_final, folder_name=folder_name)
     print('No3. read final pikle file and split dataset')
