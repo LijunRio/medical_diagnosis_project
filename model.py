@@ -55,7 +55,7 @@ lstm_units = dense_dim
 dropout_rate = 0.2
 
 # load data
-folder_name = './pickle_files'
+folder_name = '../pickle_files'
 file_name = 'train.pkl'
 train = pd.read_pickle(os.path.join(folder_name, file_name))
 file_name = 'test.pkl'
