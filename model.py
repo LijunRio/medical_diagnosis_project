@@ -188,9 +188,9 @@ model.compile(optimizer=optimizer, loss=tf.keras.losses.SparseCategoricalCrossen
 
 tf.keras.backend.clear_session()
 tb_filename = 'Simple_Encoder_Decoder/'
-tb_file = os.path.join('./Medical image Reporting', tb_filename)
+tb_file = os.path.join('../Medical_image_Reporting', tb_filename)
 model_filename = 'Simple_Encoder_Decoder.h5'
-model_save = os.path.join('./Medical image Reporting', model_filename)
+model_save = os.path.join('./Medical_image_Reporting', model_filename)
 my_callbacks = [tf.keras.callbacks.EarlyStopping(patience=5, verbose=2),
                 tf.keras.callbacks.ModelCheckpoint(filepath=model_save, save_best_only=True,
                                                    save_weights_only=True,verbose=2),
@@ -199,7 +199,7 @@ my_callbacks = [tf.keras.callbacks.EarlyStopping(patience=5, verbose=2),
                                                      min_lr=10 ** -7, verbose=2)]  # from keras documentation
 
 # load data
-folder_name = './pickle_files'
+folder_name = '../pickle_files'
 file_name = 'train.pkl'
 train = pd.read_pickle(os.path.join(folder_name, file_name))
 file_name = 'test.pkl'
