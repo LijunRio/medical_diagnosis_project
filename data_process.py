@@ -231,7 +231,7 @@ def process_missiing_value(df, image_folder):
     im1_size = []
     im2_size = []
     for index, row in df.iterrows():
-
+        print('image2:', os.path.join(image_folder, row.get('image_2')))
         im1_size.append(cv2.imread(os.path.join(image_folder, row.get('image_1'))).shape[:2])
         im2_size.append(cv2.imread(os.path.join(image_folder, row.get('image_2'))).shape[:2])
         # except:
