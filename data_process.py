@@ -381,9 +381,9 @@ if __name__ == '__main__':
     print('The number of reports in the data are: %i' % (total_reports))
 
     # find_association(reports_folder)  # find the association between image and reports
-    df = get_df()
+    df_first = get_df()
     print('No1. get dataframe finsh ! ')
-    process_missiing_value(df, image_folder)
+    process_missiing_value(df_first, image_folder)
     print('No2. processing missing value and save final pikle file!')
 
     # data impression
