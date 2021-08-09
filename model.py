@@ -67,7 +67,7 @@ tokenizer, max_pad, test_captions, vocab_size, start_index, end_index = tokenizi
 print("max_pad:", max_pad)
 
 glove = {}  # glove用于将词向量化
-with open('./glove.6B.300d.txt', encoding='utf-8') as f:  # taking 300 dimesions
+with open('../glove.6B.300d.txt', encoding='utf-8') as f:  # taking 300 dimesions
     for line in f:
         word = line.split()  # it is stored as string like this "'the': '.418 0.24968 -0.41242 0.1217 0.34527
         # -0.044457 -0.4"
