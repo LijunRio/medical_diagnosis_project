@@ -38,7 +38,7 @@ class Image_encoder(tf.keras.layers.Layer):
 
     def __init__(self, name="image_encoder_block"):
         super().__init__()
-        self.chexnet_weights = './model/brucechou1983_CheXNet_Keras_0.3.0_weights.h5'
+        self.chexnet_weights = '../model/brucechou1983_CheXNet_Keras_0.3.0_weights.h5'
         self.chexnet = create_chexnet(self.chexnet_weights)
         self.chexnet.trainable = False
         for i in range(10):  # the last 10 layers of chexnet will be trained
