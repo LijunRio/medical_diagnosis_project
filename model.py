@@ -190,7 +190,7 @@ tf.keras.backend.clear_session()
 tb_filename = 'Simple_Encoder_Decoder/'
 tb_file = os.path.join('../Medical_image_Reporting', tb_filename)
 model_filename = 'Simple_Encoder_Decoder.h5'
-model_save = os.path.join('./Medical_image_Reporting', model_filename)
+model_save = os.path.join('../Medical_image_Reporting', model_filename)
 my_callbacks = [tf.keras.callbacks.EarlyStopping(patience=5, verbose=2),
                 tf.keras.callbacks.ModelCheckpoint(filepath=model_save, save_best_only=True,
                                                    save_weights_only=True, verbose=2),
