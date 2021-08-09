@@ -6,3 +6,5 @@ tensorflow
 joblib
 streamlit
 Pillow
+seaborn
+imgaug
