@@ -1,0 +1,8 @@
+opencv_python
+numpy
+nltk
+pandas
+tensorflow
+joblib
+streamlit
+Pillow
