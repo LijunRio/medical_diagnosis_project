@@ -193,8 +193,8 @@ model_filename = 'Simple_Encoder_Decoder.h5'
 model_save = os.path.join('./Medical_image_Reporting', model_filename)
 my_callbacks = [tf.keras.callbacks.EarlyStopping(patience=5, verbose=2),
                 tf.keras.callbacks.ModelCheckpoint(filepath=model_save, save_best_only=True,
-                                                   save_weights_only=True,verbose=2),
-                tf.keras.callbacks.TensorBoard(histogram_freq=1,log_dir=tb_file),
+                                                   save_weights_only=True, verbose=2),
+                tf.keras.callbacks.TensorBoard(histogram_freq=1, log_dir=tb_file),
                 tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=2,
                                                      min_lr=10 ** -7, verbose=2)]  # from keras documentation
 
@@ -217,8 +217,8 @@ test_dataloader = Dataset(test, input_size=input_size, tokenizer=tokenizer, max_
 test_dataloader = Dataloader(test_dataloader, batch_size=batch_size)
 
 model.fit(train_dataloader,
-          validation_data = test_dataloader,
-          epochs = 10,
-          callbacks = my_callbacks
+          validation_data=test_dataloader,
+          epochs=10,
+          callbacks=my_callbacks
           )
 print('ok')

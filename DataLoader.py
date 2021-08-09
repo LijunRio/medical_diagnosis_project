@@ -145,14 +145,14 @@ class Dataloader(tf.keras.utils.Sequence):  # for batching
 
 
 if __name__ == '__main__':
-#
-#     # Set Hyper parameters
+    #
+    #     # Set Hyper parameters
     batch_size = 100
-#     embedding_dim = 300
-#     dense_dim = 512
-#     lstm_units = dense_dim
-#     dropout_rate = 0.2
-#
+    #     embedding_dim = 300
+    #     dense_dim = 512
+    #     lstm_units = dense_dim
+    #     dropout_rate = 0.2
+    #
     # load data
     folder_name = '../pickle_files'
     file_name = 'train.pkl'

@@ -240,7 +240,7 @@ def process_missiing_value(df, image_folder):
     df['im2_width'] = [i[1] for i in im2_size]
 
     # save the final data to pkl file
-    df.to_pickle("./df_final.pkl")
+    df.to_pickle("../data/pickle_files/df_final.pkl")
     print('-' * 30)
     print('final data shape:', df.shape)
     print('after processing missing value')
@@ -292,7 +292,7 @@ def wordcloud_analysis(df):
     plt.show()
 
 
-def split_dataset(df):
+def split_dataset(df, folder_name):
     col = ['image_1', 'image_2', 'impression', 'xml file name']
     df = df[col].copy()
     # path
@@ -355,7 +355,7 @@ def split_dataset(df):
     del df_minority_upsampled, df_minority, df_majority, df_other, df_other_downsampled
     # train.shape (4487, 8)
 
-    folder_name = './pickle_files'
+
     file_name = 'train.pkl'
     train.to_pickle(os.path.join(folder_name, file_name))
 
@@ -367,31 +367,28 @@ def split_dataset(df):
 
 if __name__ == '__main__':
     # load image folder
-    image_folder = 'D:\\Download\\x_rays_opendataset\\NLMCXR_png'  # path to folder containing images
+    image_folder = '../data/image'  # path to folder containing images
     total_images = len(os.listdir(image_folder))
     print('The number of images in data are: %i' % total_images)
 
     # load reports folder
-    reports_folder = "D:\\Download\\x_rays_opendataset\\NLMCXR_reports\\ecgen-radiology"
+    reports_folder = "../data/ecgen-radiology"
     total_reports = len(os.listdir(reports_folder))
     print('The number of reports in the data are: %i' % (total_reports))
 
     # find_association(reports_folder)  # find the association between image and reports
-    # df = get_df()
-    # process_missiing_value(df, image_folder)
+    df = get_df()
+    print('No1. get dataframe finsh ! ')
+    process_missiing_value(df, image_folder)
+    print('No2. processing missing value and save final pikle file!')
 
     # data impression
-    # df = pd.read_pickle('./df_final.pkl')
+    df = pd.read_pickle('./df_final.pkl')
     # evaluate_height_weight(df)
     # wordcloud_analysis(df)
 
-    # split_dataset(df)
+    folder_name = '../pickle_files'
+    split_dataset(df=df, folder_name=folder_name)
+    print('No3. read final pikle file and split dataset')
 
-    folder_name = './pickle_files'
-    file_name = 'train.pkl'
-    train = pd.read_pickle(os.path.join(folder_name, file_name))
 
-    file_name = 'test.pkl'
-    test = pd.read_pickle(os.path.join(folder_name, file_name))
-
-    tokenizing_analysis(train, test)
