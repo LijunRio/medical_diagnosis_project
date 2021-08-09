@@ -216,6 +216,7 @@ def process_missiing_value(df, image_folder):
     :return: save the final_data into pkl file
     """
     # 查看缺失值所占的比例
+    print('df.shape:', df.shape)
     print("columns\t\t%missing values")
     print('-' * 30)
     print(df.isnull().sum() * 100 / df.shape[0])  # percentage missing values
