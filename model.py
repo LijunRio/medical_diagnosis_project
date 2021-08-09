@@ -216,9 +216,10 @@ train_dataloader = Dataloader(train_dataloader, batch_size=batch_size)
 test_dataloader = Dataset(test, input_size=input_size, tokenizer=tokenizer, max_pad=max_pad)
 test_dataloader = Dataloader(test_dataloader, batch_size=batch_size)
 
-model.fit(train_dataloader,
-          validation_data=test_dataloader,
-          epochs=10,
-          callbacks=my_callbacks
-          )
+with tf.device("/device:GPU:0"):
+    model.fit(train_dataloader,
+              validation_data=test_dataloader,
+              epochs=10,
+              callbacks=my_callbacks
+              )
 print('ok')
