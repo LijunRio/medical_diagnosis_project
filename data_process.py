@@ -231,13 +231,10 @@ def process_missiing_value(df, image_folder):
     df.loc[df.image_2.isnull(), 'image_2'] = df[df.image_2.isnull()]['image_1'].values
     im1_size = []
     im2_size = []
-    for index, row in df.iterrows():
-        # print('image2:', os.path.join(image_folder, row.get('image_2')))
+    for index, row in tqdm(df.iterrows(), total=df.shape[0]):
         im1_size.append(cv2.imread(os.path.join(image_folder, row.get('image_1'))).shape[:2])
         im2_size.append(cv2.imread(os.path.join(image_folder, row.get('image_2'))).shape[:2])
-        # except:
-        #     print('image1:', os.path.join(image_folder, row.get('image_1')))
-        #     print('image2:', os.path.join(image_folder, row.get('image_2')))
+
 
     df['im1_height'] = [i[0] for i in im1_size]
     df['im1_width'] = [i[1] for i in im1_size]
