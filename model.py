@@ -6,6 +6,9 @@ from DataLoader import tokenizing_analysis
 import pandas as pd
 import os
 from DataLoader import Dataloader, Dataset
+from nltk.translate.bleu_score import sentence_bleu  # bleu score
+import cv2
+import matplotlib.pyplot as plt
 
 
 # chexnet weights ; https://drive.google.com/file/d/19BllaOvs2x5PLV_vlWMy4i8LapLb2j6b/view
@@ -216,10 +219,271 @@ train_dataloader = Dataloader(train_dataloader, batch_size=batch_size)
 test_dataloader = Dataset(test, input_size=input_size, tokenizer=tokenizer, max_pad=max_pad)
 test_dataloader = Dataloader(test_dataloader, batch_size=batch_size)
 
-with tf.device("/device:GPU:0"):
-    model.fit(train_dataloader,
-              validation_data=test_dataloader,
-              epochs=10,
-              callbacks=my_callbacks
-              )
+# with tf.device("/device:GPU:0"):
+#     model.fit(train_dataloader,
+#               validation_data=test_dataloader,
+#               epochs=10,
+#               callbacks=my_callbacks
+#               )
+
+# predict part
+
+
+model1 = tf.keras.Model(inputs=[image1, image2, caption], outputs=output)
+model1.load_weights(model_save)
+
+
+def get_bleu(reference, prediction):
+    """
+  Given a reference and prediction string, outputs the 1-gram,2-gram,3-gram and 4-gram bleu scores
+  """
+    reference = [reference.split()]  # should be in an array (cos of multiple references can be there here only 1)
+    prediction = prediction.split()
+    bleu1 = sentence_bleu(reference, prediction, weights=(1, 0, 0, 0), )
+    bleu2 = sentence_bleu(reference, prediction, weights=(0.5, 0.5, 0, 0))
+    bleu3 = sentence_bleu(reference, prediction, weights=(0.33, 0.33, 0.33, 0))
+    bleu4 = sentence_bleu(reference, prediction, weights=(0.25, 0.25, 0.25, 0.25))
+
+    return bleu1, bleu2, bleu3, bleu4
+
+
+# calculate bleu scores for every datapoint
+def mean_bleu(test, predict, model=model1, **kwargs):
+    """
+  given a df and predict fucntion which predicts the impression of the caption
+  outpus the mean bleu1,bleu2,bleu3, bleu4 for entire datapoints in df
+  """
+    if kwargs != None:
+        top_k = kwargs.get('top_k')
+    else:
+        top_k = None
+    bleu1, bleu2, bleu3, bleu4 = [], [], [], []
+    for index, data in test.iterrows():
+        if top_k == None:
+            predict_val = predict(data['image_1'], data['image_2'], model=model)  # predicted sentence
+        else:
+            predict_val = predict(data['image_1'], data['image_2'], model=model, top_k=top_k)
+        true = data.impression
+        _ = get_bleu(true, predict_val)
+        bleu1.append(_[0])
+        bleu2.append(_[1])
+        bleu3.append(_[2])
+        bleu4.append(_[3])
+    return np.array(bleu1).mean(), np.array(bleu2).mean(), np.array(bleu3).mean(), np.array(bleu4).mean()
+
+
+def greedy_search_predict(image1, image2, model=model1):
+    """
+    Given paths to two x-ray images predicts the impression part of the x-ray in a greedy search algorithm
+    """
+    image1 = cv2.imread(image1, cv2.IMREAD_UNCHANGED) / 255
+    image2 = cv2.imread(image2, cv2.IMREAD_UNCHANGED) / 255
+    image1 = tf.expand_dims(cv2.resize(image1, input_size, interpolation=cv2.INTER_NEAREST),
+                            axis=0)  # introduce batch and resize
+    image2 = tf.expand_dims(cv2.resize(image2, input_size, interpolation=cv2.INTER_NEAREST), axis=0)
+
+    image1 = model.get_layer('image_encoder')(image1)  # output from chexnet
+    image2 = model.get_layer('image_encoder')(image2)
+
+    # image1 = model.get_layer('bk_dense')(image1) #op from dense layer
+    # image2 = model.get_layer('bk_dense')(image2)
+
+    concat = model.get_layer('concatenate')([image1, image2])
+    image_dense = model.get_layer('Image_dense')(concat)
+    # concat = model.get_layer('batch_normalization')(concat)
+    # image_dense = model.get_layer('Image_dense')(concat)
+    bk_feat = tf.keras.backend.expand_dims(image_dense, axis=1)
+
+    states = [image_dense, image_dense]
+    a = []
+    pred = []
+    for i in range(max_pad):
+        if i == 0:  # if first word
+            caption = np.array(tokenizer.texts_to_sequences(['<cls>']))  # shape: (1,1)
+        caption = model.get_layer('embedding')(caption)  # embedding shape = 1*1*300
+        caption, state_h, state_c = model.get_layer('lstm')(caption, initial_state=states)  # lstm 1*1*512
+        states = [state_h, state_c]
+
+        add = model.get_layer('add')([bk_feat, caption])  # add
+        output = model.get_layer('output_dense')(add)  # 1*1*vocab_size (here batch_size=1)
+
+        # prediction
+        max_prob = tf.argmax(output, axis=-1)  # tf.Tensor of shape = (1,1)
+        caption = np.array(max_prob)  # will be sent to embedding for next iteration
+        if max_prob == np.squeeze(tokenizer.texts_to_sequences(['<end>'])):
+            break;
+        else:
+            a.append(tf.squeeze(max_prob).numpy())
+    return tokenizer.sequences_to_texts([a])[0]  # here output would be 1,1 so subscripting to open the array
+
+
+k = -1
+image1, image2 = test['image_1'].iloc[k], test['image_2'].iloc[k]
+print(greedy_search_predict(image1, image2, model=model))
+
+_ = mean_bleu(test, greedy_search_predict)
+
+k = list(_)
+index = 'greedy search'
+result = pd.DataFrame([k], columns=["bleu1", "bleu2", "bleu3", "bleu4"], index=[index])
+print(result)
+
+
+def encoder_op(image1, image2, model=model1):
+    """
+  Given image1 and image2 filepath, outputs
+  their backbone features which will be input
+  to the decoder
+  """
+    image1 = cv2.imread(image1, cv2.IMREAD_UNCHANGED) / 255
+    image2 = cv2.imread(image2, cv2.IMREAD_UNCHANGED) / 255
+
+    image1 = tf.expand_dims(cv2.resize(image1, input_size, interpolation=cv2.INTER_NEAREST),
+                            axis=0)  # introduce batch and resize
+    image2 = tf.expand_dims(cv2.resize(image2, input_size, interpolation=cv2.INTER_NEAREST), axis=0)
+
+    image1 = model.get_layer('image_encoder')(image1)  # output from chexnet
+    image2 = model.get_layer('image_encoder')(image2)
+
+    concat = model.get_layer('concatenate')([image1, image2])
+    image_dense = model.get_layer('Image_dense')(concat)
+    bk_feat = tf.keras.backend.expand_dims(image_dense, axis=1)
+    states = [image_dense, image_dense]
+    return bk_feat, states
+
+
+def beam_search_predict(image1, image2, top_k=3, max_pad=max_pad, model=model1):
+    """
+    Given image1, image2 get the top
+    beam search predicted sentence
+    """
+    k = top_k
+    cls_token = tokenizer.texts_to_sequences(['<cls>'])[0]  # [3]
+    bk_feat, states = encoder_op(image1, image2)
+    seq_score = [[cls_token, 0, states]]  # [[[3], 0]]
+    finished_seq_score = []
+    for i in range(max_pad):  # traverse through all lengths
+        all_candidates = []  # stores all the top k seq along with their scores
+        new_seq_score = []  # stores the seq_score which does not have <end> in them
+        for s in seq_score:  # traverse for all top k sequences
+            text_input = s[0][-1]  # getting the last predicted output
+            # print(s)
+            states = s[2]
+            caption = model.get_layer('embedding')(
+                np.array([[text_input]]))  # ip must be in shape (batch_size,seq length,dim)
+            caption, state_h, state_c = model.get_layer('lstm')(caption, initial_state=states)
+            states = [state_h, state_c]
+            add = model.get_layer('add')([bk_feat, caption])
+            output = model.get_layer('output_dense')(add)[0][0]  # (vocab_size,)
+            top_words = tf.argsort(output, direction='DESCENDING')[:k]  # get the top k words
+
+            seq, score, _ = s
+            for t in top_words.numpy():
+                # here we will update score with log of probabilities and subtracting(log of prob will be in negative)
+                # here since its -(log), lower the score higher the prob
+                candidates = [seq + [t], score - np.log(output[t].numpy()), states]  # updating the score and seq
+                all_candidates.append(candidates)
+            seq_score = sorted(all_candidates, key=lambda l: l[1])[
+                        :k]  # getting the top 3 sentences with high prob ie low score
+            # checks for  <end> in each seq obtained
+            count = 0
+            end_token = tokenizer.word_index['<end>']
+            for seq, score, state in seq_score:
+                # print('seq,score',seq,score)
+                if seq[-1] == end_token:  # if last word of the seq is <end>
+                    finished_seq_score.append([seq, score])
+                    count += 1
+                else:
+                    new_seq_score.append([seq, score, state])
+            k -= count  # substracting the no. of finished sentences from beam length
+            seq_score = new_seq_score
+
+            if seq_score == []:  # if null array
+                break;
+            else:
+                continue;
+
+    seq_score = finished_seq_score[-1]
+    sentence = seq_score[0][1:-1]  # here <cls> and <end> is here so not considering that
+    score = seq_score[1]
+
+    return tokenizer.sequences_to_texts([sentence])[0]
+
+
+k = -1
+image1, image2 = test['image_1'].iloc[k], test['image_2'].iloc[k]
+print(beam_search_predict(image1, image2, top_k=3))
+
+test['bleu_1_gs'] = np.zeros(test.shape[0])  # greedy search
+test['bleu_1_bm'] = np.zeros(test.shape[0])  # beam search
+test['prediction_gs'] = np.zeros(test.shape[0])  # greedy search
+test['prediction_bm'] = np.zeros(test.shape[0])  # beam search
+for index, rows in test.iterrows():
+    # greedy search
+    predicted_text = greedy_search_predict(rows.image_1, rows.image_2, model1)
+    test.loc[index, 'prediction_gs'] = predicted_text
+    reference = [rows['impression'].split()]
+    test.loc[index, 'bleu_1_gs'] = sentence_bleu(reference, predicted_text.split(), weights=(1, 0, 0, 0))
+
+    # beam search
+    predicted_text = beam_search_predict(rows.image_1, rows.image_2, top_k=3, model=model1)
+    test.loc[index, 'prediction_bm'] = predicted_text
+    test.loc[index, 'bleu_1_bm'] = sentence_bleu(reference, predicted_text.split(), weights=(1, 0, 0, 0))
+
+test['prediction_gs'].value_counts() * 100 / test.shape[0]  # greedy search
+test['prediction_bm'].value_counts() * 100 / test.shape[0]  # beam search
+
+
+def final_caption_pred(image1, image2, method="beam", top_k=3, model=model1):
+    """
+    Given image1. image2 paths, the model, top_k and the method of prediction returns the predicted caption
+    method: "greedy" or "g" for greedy search, "beam" or "b" for beam search
+    """
+    if method in ['greedy', 'g']:
+        pred_caption = greedy_search_predict(image1, image2, model)
+    elif method in ['beam', 'b']:
+        pred_caption = beam_search_predict(image1, image2, top_k=top_k, model=model)
+    else:
+        print("Enter 'b' or 'beam' for beam search and 'g' or 'greedy' for greedy search")
+
+    return pred_caption
+
+
+def inference(image1, image2, true_caption, model=model1, top_k=[3], image_size=(10, 20)):
+    """
+  given 2 images (their paths), the true caption, the model and the range of top_k
+  prints the two images, true caption along with greedy search prediction and beam search prediction of top_k range
+  """
+    image1_array = cv2.imread(image1, cv2.IMREAD_UNCHANGED)
+    image2_array = cv2.imread(image2, cv2.IMREAD_UNCHANGED)
+    if type(top_k) == int:
+        top_k = [top_k]  # changing it to list if top_k given is of int type
+    greedy_caption = final_caption_pred(image1, image2, method='g', model=model)  # getting the greedy search prediction
+
+    # printing the 2 images
+    plt.figure(figsize=image_size)
+    plt.subplot(121)
+    plt.imshow(image1_array)
+    plt.axis("off")
+
+    plt.subplot(122)
+    plt.imshow(image2_array)
+    plt.axis("off")
+    plt.show()
+
+    print("\nTrue caption: '%s'" % (true_caption))
+    print("Predicted caption(greedy search): '%s'" % (greedy_caption))
+    # beam search of top_k
+    if top_k != None:
+        for i in top_k:
+            beam_caption = final_caption_pred(image1, image2, method='b', model=model, top_k=i)
+            print("Predicted caption(beam search = %i): '%s'" % (i, beam_caption))
+
+
+i = test[test['bleu_1_gs']>0.8].sample(5).index
+for k in i:
+  image1,image2 = test['image_1'][k],test['image_2'][k]
+  true_caption = test['impression'][k]
+  inference(image1,image2,true_caption)
+
 print('ok')
