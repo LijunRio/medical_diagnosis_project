@@ -164,7 +164,7 @@ class BaseLine(object):
 
         tb_filename = 'Simple_Encoder_Decoder/'
         tb_file = os.path.join(args.modelSave_path, tb_filename)
-        model_filename = 'Simple_Encoder_Decoder2.h5'
+        model_filename = 'Simple_Encoder_Decoder3.h5'
         model_save = os.path.join(args.modelSave_path, model_filename)
 
         my_callbacks = [tf.keras.callbacks.EarlyStopping(patience=5, verbose=2),
@@ -403,8 +403,8 @@ class BaseLine(object):
 
 if __name__ == '__main__':
     baseline = BaseLine(print_model=True, draw_model=True)
-    baseline.model()
-    # baseline.train()
+    # baseline.model()
+    baseline.train()
     # _, image1, image2, caption,output = baseline.model()
     # model1 = tf.keras.Model(inputs=[image1, image2, caption], outputs=output)
     # model1.load_weights(os.path.join(args.modelSave_path, 'Simple_Encoder_Decoder_0.h5'))
