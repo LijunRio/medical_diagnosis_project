@@ -238,8 +238,8 @@ class BaseLine(object):
                                 axis=0)  # introduce batch and resize
         image2 = tf.expand_dims(cv2.resize(image2, self.input_size, interpolation=cv2.INTER_NEAREST), axis=0)
 
-        image1 = model.get_layer('Image_encoder')(image1)  # output from chexnet
-        image2 = model.get_layer('Image_encoder')(image2)
+        image1 = model.get_layer('image_encoder')(image1)  # output from chexnet
+        image2 = model.get_layer('image_encoder')(image2)
         print('image1_shape:', image1)
         print('image2_shape:', image2)
 
