@@ -240,8 +240,8 @@ class BaseLine(object):
 
         image1 = model.get_layer('image_encoder')(image1)  # output from chexnet
         image2 = model.get_layer('image_encoder')(image2)
-        print('image1_shape:', image1)
-        print('image2_shape:', image2)
+        # print('image1_shape:', image1)
+        # print('image2_shape:', image2)
 
         concat = model.get_layer('concatenate')([image1, image2])
         image_dense = model.get_layer('Image_dense')(concat)
@@ -382,7 +382,7 @@ class BaseLine(object):
 
         k = -1  # 位置-1
         image1, image2 = test['image_1'].iloc[k], test['image_2'].iloc[k]
-        print(self.beam_search_predict(image1, image2, model=model, top_k=3))
+        # print(self.beam_search_predict(image1, image2, model=model, top_k=3))
 
         test['bleu_1_gs'] = np.zeros(test.shape[0])  # greedy search
         test['bleu_1_bm'] = np.zeros(test.shape[0])  # beam search
