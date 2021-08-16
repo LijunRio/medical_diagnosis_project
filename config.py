@@ -4,19 +4,19 @@ from yacs.config import CfgNode as CN
 config = CN()
 
 """ ============== Path Config ================= """
-# # 服务器path
-# config.chexnet_weights = '../model/brucechou1983_CheXNet_Keras_0.3.0_weights.h5'
-# config.data_folder = '../pickle_files'
-# config.glove_path = '../glove.6B.300d.txt'
-# config.modelPng_save = './model.png'
-# config.modelSave_path = '../Medical_image_Reporting'
-
-# local path
-config.chexnet_weights = 'D:/Code/SIAT_2021/data/model/brucechou1983_CheXNet_Keras_0.3.0_weights.h5'
-config.data_folder = 'D:/Code/SIAT_2021/data/pickle_files'
-config.glove_path = 'D:/Code/SIAT_2021/data/glove.6B.300d.txt'
+# 服务器path
+config.chexnet_weights = '../model/brucechou1983_CheXNet_Keras_0.3.0_weights.h5'
+config.data_folder = '../pickle_files'
+config.glove_path = '../glove.6B.300d.txt'
 config.modelPng_save = './model2.png'
-config.modelSave_path = 'D:\Code\SIAT_2021\data\Medical image Reporting'
+config.modelSave_path = '../Medical_image_Reporting'
+
+# # local path
+# config.chexnet_weights = 'D:/Code/SIAT_2021/data/model/brucechou1983_CheXNet_Keras_0.3.0_weights.h5'
+# config.data_folder = 'D:/Code/SIAT_2021/data/pickle_files'
+# config.glove_path = 'D:/Code/SIAT_2021/data/glove.6B.300d.txt'
+# config.modelPng_save = './model2.png'
+# config.modelSave_path = 'D:\Code\SIAT_2021\data\Medical image Reporting'
 
 # hyper parameter
 config.embedding_dim = 300
