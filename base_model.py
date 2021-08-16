@@ -408,6 +408,6 @@ if __name__ == '__main__':
     # baseline.train()
     _, image1, image2, caption,output = baseline.model()
     model1 = tf.keras.Model(inputs=[image1, image2, caption], outputs=output)
-    model1.load_weights(os.path.join(args.modelSave_path, 'Simple_Encoder_Decoder_0.h5'))
+    model1.load_weights(os.path.join(args.modelSave_path, 'Simple_Encoder_Decoder3.h5'))
     print(model1.layers)
     baseline.predict(model=model1)
