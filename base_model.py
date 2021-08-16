@@ -400,6 +400,8 @@ class BaseLine(object):
             test.loc[index, 'prediction_bm'] = predicted_text
             test.loc[index, 'bleu_1_bm'] = sentence_bleu(reference, predicted_text.split(), weights=(1, 0, 0, 0))
 
+        print('gs', test['prediction_gs'].value_counts())
+        print('bm', test['prediction_bm'].value_counts())
         print(test['prediction_gs'].value_counts() * 100 / test.shape[0])  # greedy search
         print(test['prediction_bm'].value_counts() * 100 / test.shape[0])  # beam search
 
