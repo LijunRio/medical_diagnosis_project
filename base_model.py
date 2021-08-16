@@ -378,30 +378,30 @@ class BaseLine(object):
                 print("Predicted caption(beam search = %i): '%s'" % (i, beam_caption))
 
     def predict(self, model):
-        test = self.test_df
+        test = self.test_df[:10]
 
-        k = -1
+        k = -1  # 位置-1
         image1, image2 = test['image_1'].iloc[k], test['image_2'].iloc[k]
         print(self.beam_search_predict(image1, image2, model=model, top_k=3))
-        #
-        # test['bleu_1_gs'] = np.zeros(test.shape[0])  # greedy search
-        # test['bleu_1_bm'] = np.zeros(test.shape[0])  # beam search
-        # test['prediction_gs'] = np.zeros(test.shape[0])  # greedy search
-        # test['prediction_bm'] = np.zeros(test.shape[0])  # beam search
-        # for index, rows in tqdm(test.iterrows(), total=test.shape[0]):
-        #     # greedy search
-        #     predicted_text = self.greedy_search_predict(rows.image_1, rows.image_2, model=model)
-        #     test.loc[index, 'prediction_gs'] = predicted_text
-        #     reference = [rows['impression'].split()]
-        #     test.loc[index, 'bleu_1_gs'] = sentence_bleu(reference, predicted_text.split(), weights=(1, 0, 0, 0))
-        #
-        #     # beam search
-        #     predicted_text = self.beam_search_predict(rows.image_1, rows.image_2, model=model, top_k=3)
-        #     test.loc[index, 'prediction_bm'] = predicted_text
-        #     test.loc[index, 'bleu_1_bm'] = sentence_bleu(reference, predicted_text.split(), weights=(1, 0, 0, 0))
-        #
-        # print(test['prediction_gs'].value_counts() * 100 / test.shape[0])  # greedy search
-        # print(test['prediction_bm'].value_counts() * 100 / test.shape[0])  # beam search
+
+        test['bleu_1_gs'] = np.zeros(test.shape[0])  # greedy search
+        test['bleu_1_bm'] = np.zeros(test.shape[0])  # beam search
+        test['prediction_gs'] = np.zeros(test.shape[0])  # greedy search
+        test['prediction_bm'] = np.zeros(test.shape[0])  # beam search
+        for index, rows in tqdm(test.iterrows(), total=test.shape[0]):
+            # greedy search
+            predicted_text = self.greedy_search_predict(rows.image_1, rows.image_2, model=model)
+            test.loc[index, 'prediction_gs'] = predicted_text
+            reference = [rows['impression'].split()]
+            test.loc[index, 'bleu_1_gs'] = sentence_bleu(reference, predicted_text.split(), weights=(1, 0, 0, 0))
+
+            # beam search
+            predicted_text = self.beam_search_predict(rows.image_1, rows.image_2, model=model, top_k=3)
+            test.loc[index, 'prediction_bm'] = predicted_text
+            test.loc[index, 'bleu_1_bm'] = sentence_bleu(reference, predicted_text.split(), weights=(1, 0, 0, 0))
+
+        print(test['prediction_gs'].value_counts() * 100 / test.shape[0])  # greedy search
+        print(test['prediction_bm'].value_counts() * 100 / test.shape[0])  # beam search
 
 
 if __name__ == '__main__':
