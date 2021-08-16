@@ -2,6 +2,8 @@
 
 ## 项目背景
 
+结合文本和图像进行模型训练，是模型能结合文本和图像信息进行诊断预测。最终效果，输入两张X光图像，模型可以根据图像生成诊断报告。
+
 ## NLP基础知识
 
 ## 1、NLP中数据处理方式
@@ -12,7 +14,7 @@
 
 - Age: Numeric Feature
   - 对于NF类特征，数值本身既可以作为对应的值
-- Gender、Nationality: Categorical Featrue
+- Gender、Nationality: Categorical Feature
   - Gender: 可以用一个bool变量来代表。Female->0  Male->1
   - Nationality: 建立一个字典来对应国家
     - E.g.   US->1,		China->2,		India->3,		Japan->4,		Germany->5

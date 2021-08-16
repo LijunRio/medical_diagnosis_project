@@ -24,7 +24,7 @@ def tokenizing_analysis(train, test, visualising=False):
     # train_captions: list[list[int]]
     train_captions = tokenizer.texts_to_sequences(train.impression_final)
     test_captions = tokenizer.texts_to_sequences(test.impression_final)
-    vocab_size = len(tokenizer.word_index)
+    vocab_size = len(tokenizer.word_index)  # tokenization之后的sequence长度，单词长度
     caption_len = np.array([len(i) for i in train_captions])
     start_index = tokenizer.word_index['<cls>']  # tokened value of <cls>
     end_index = tokenizer.word_index['<end>']  # tokened value of <end>
@@ -50,6 +50,7 @@ def tokenizing_analysis(train, test, visualising=False):
     return tokenizer, max_pad, test_captions, vocab_size, start_index, end_index
 
 
+# 输入数据的pipline
 class Dataset():
     # here we will get the images converted to vector form and the corresponding captions
     def __init__(self, df, input_size, tokenizer, max_pad, augmentation=True):
@@ -83,12 +84,14 @@ class Dataset():
             print("%i , %s image sent null value" % (i, self.image2[i]))
 
         # tokenizing and padding
+        # caption 是impression部分加上<cls>开始标记
         caption = self.tokenizer.texts_to_sequences(
             self.caption[i:i + 1])  # the input should be an array for tokenizer ie [self.caption[i]]
 
         caption = pad_sequences(caption, maxlen=self.max_pad, padding='post')  # opshape:(input_length,)
         caption = tf.squeeze(caption, axis=0)  # opshape = (input_length,) removing unwanted axis if present
 
+        # caption1为输出，impression加上<END>结束标志为
         caption1 = self.tokenizer.texts_to_sequences(
             self.caption1[i:i + 1])  # the input should be an array for tokenizer ie [self.caption[i]]
 
@@ -112,10 +115,11 @@ class Dataset():
         return len(self.image1)
 
 
+# Dataloader继承自tf.keras.utils.Sequence
 class Dataloader(tf.keras.utils.Sequence):  # for batching
     def __init__(self, dataset, batch_size=1, shuffle=True):
         self.dataset = dataset
-        self.batch_size = batch_size
+        self.batch_size = batch_size  # batchsize默认1
         self.shuffle = shuffle
         self.indexes = np.arange(len(self.dataset))
 
@@ -128,10 +132,9 @@ class Dataloader(tf.keras.utils.Sequence):  # for batching
                 indexes]  # taken from Data class (calls __getitem__ of Data) here the shape is batch_size*3,
         # (image_1,image_2,caption)
 
-        batch = [np.stack(samples, axis=0) for samples in
-                 zip(*data)]  # here the shape will become batch_size*input_size(of image)*3,batch_size*input_size(of
-        # image)*3
-        # ,batch_size*1*max_pad
+        # here the shape will become batch_size*input_size(of image)*3, batch_size*input_size(of image)*3 ,
+        # batch_size*1*max_pad
+        batch = [np.stack(samples, axis=0) for samples in zip(*data)]
 
         return tuple([[batch[0], batch[1], batch[2]],
                       batch[3]])  # here [image1,image2, caption(without <END>)],caption(without <CLS>) (op)

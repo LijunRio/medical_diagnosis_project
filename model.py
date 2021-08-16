@@ -9,6 +9,8 @@ from DataLoader import Dataloader, Dataset
 from nltk.translate.bleu_score import sentence_bleu  # bleu score
 import cv2
 import matplotlib.pyplot as plt
+from config import config as args
+from tqdm import tqdm
 
 
 # chexnet weights ; https://drive.google.com/file/d/19BllaOvs2x5PLV_vlWMy4i8LapLb2j6b/view
@@ -41,7 +43,7 @@ class Image_encoder(tf.keras.layers.Layer):
 
     def __init__(self, name="image_encoder_block"):
         super().__init__()
-        self.chexnet_weights = '../model/brucechou1983_CheXNet_Keras_0.3.0_weights.h5'
+        self.chexnet_weights = args.chexnet_weights
         self.chexnet = create_chexnet(self.chexnet_weights)
         self.chexnet.trainable = False
         for i in range(10):  # the last 10 layers of chexnet will be trained
@@ -58,11 +60,13 @@ lstm_units = dense_dim
 dropout_rate = 0.2
 
 # load data
-folder_name = '../pickle_files'
+folder_name = args.data_folder
 file_name = 'train.pkl'
 train = pd.read_pickle(os.path.join(folder_name, file_name))
 file_name = 'test.pkl'
 test = pd.read_pickle(os.path.join(folder_name, file_name))
+test = test[:10]  # 仅仅用前10个做测试
+print(test.shape)
 
 # DataLoader Part
 input_size = (224, 224)
@@ -70,7 +74,7 @@ tokenizer, max_pad, test_captions, vocab_size, start_index, end_index = tokenizi
 print("max_pad:", max_pad)
 
 glove = {}  # glove用于将词向量化
-with open('../glove.6B.300d.txt', encoding='utf-8') as f:  # taking 300 dimesions
+with open(args.glove_path, encoding='utf-8') as f:  # taking 300 dimesions
     for line in f:
         word = line.split()  # it is stored as string like this "'the': '.418 0.24968 -0.41242 0.1217 0.34527
         # -0.044457 -0.4"
@@ -86,11 +90,11 @@ for word, i in tokenizer.word_index.items():
     if embedding_vector is not None:  # if the word is found in glove vectors
         embedding_matrix[i] = embedding_vector[:embedding_dim]
 
-tf.keras.backend.clear_session()  # 输入大小(224,224,3)
+tf.keras.backend.clear_session()  # 清除小节
 # https://www.w3resource.com/python-exercises/tuple/python-tuple-exercise-5.php
 image1 = Input(shape=(input_size + (3,)))  # shape = 224,224,3
 image2 = Input(shape=(input_size + (3,)))
-caption = Input(shape=(max_pad,))
+caption = Input(shape=(max_pad,))  # 第80百分位的长度，28
 
 # 使用chexnet进行图片编码
 img_encoder = Image_encoder()  # contains chexnet model which is set trainable  =  False
@@ -107,11 +111,11 @@ bk_feat2 = img_encoder(image2)  # 对image2 进行编码
 
 # 将image1 和 image2 的特征向量进行concat
 # concatenating the backbone images op_shape: (?,1024)
-bk_features_concat = Concatenate(axis=-1)([bk_feat1, bk_feat2])
+bk_features_concat = Concatenate(axis=-1)([bk_feat1, bk_feat2])  # (None, 2048)
 
 # bk_features_concat = BatchNormalization()(bk_features_concat) #applying batch norm
 # bk_features_concat = Dropout(dropout_rate)(bk_features_concat)
-image_dense = Dense(dense_dim,
+image_dense = Dense(dense_dim,  # 将2048压缩成512维
                     activation='relu',
                     name='Image_dense',
                     use_bias='False'
@@ -119,43 +123,56 @@ image_dense = Dense(dense_dim,
 
 # 将concat到一起的向量再通过dense net
 # final op from dense op_shape:
+
+# 这里dense_dim = 512, 输出（None, 512）
 image_bkbone = image_dense(bk_features_concat)  # (?,dense_dim) this will be added as initial states to the lstm
+# 扩张一维
 image_dense_op = tf.keras.backend.expand_dims(image_bkbone, axis=1)  # op_shape: (?,1,dense_dim)
 
+# 嵌入层
 embedding = Embedding(input_dim=vocab_size + 1,
                       output_dim=embedding_dim,
                       input_length=max_pad,
                       mask_zero=True,
-                      weights=[embedding_matrix],
+                      weights=[embedding_matrix],  # 使用glove vector来初始化权重
                       name='embedding'
                       )
+
+# （None, 28, 300）
 embed_op = embedding(caption)  # op_shape: (?,input_length,embedding_dim)
 
-lstm_layer = LSTM(units=lstm_units,
-                  return_sequences=True,
-                  return_state=True
-                  )
+
+# lstm_units = dense_dim = 512
+# units：输出维度
+# input_dim：输入维度，当使用该层为模型首层时，应指定该值（或等价的指定input_shape)
+# return_sequences：布尔值，默认False，控制返回类型。若为True则返回整个序列，否则仅返回输出序列的最后一个输出
+# input_length：当输入序列的长度固定时，该参数为输入序列的长度。当需要在该层后连接Flatten层，然后又要连接Dense层时，需要指定该参数，否则全连接的输出无法计算出来。
+
+lstm_layer = LSTM(units=lstm_units, return_sequences=True, return_state=True)
 # op_shape = batch_size*input_length*lstm_units
+
+# 使用两张图片提取出来的特征向量作为LSTM的初始参数
+# lstm_op (None, 28, 512), lstm_h(None, 512), lstm_c(None, 512)
 lstm_op, lstm_h, lstm_c = lstm_layer(embed_op, initial_state=[image_bkbone, image_bkbone])
 
 # lstm_op = BatchNormalization()(lstm_op)
 # op_shape: (?,input_lenght,lstm_units/dense_dim) here lstm_dims=dense_dim
-add = Add()([image_dense_op, lstm_op])
+add = Add()([image_dense_op, lstm_op])  # (None, 28+1, 512)
 
-op_dense = Dense(vocab_size + 1,
+op_dense = Dense(vocab_size + 1,  # 单词长度+1
                  activation='softmax',
                  name='output_dense'
                  )  # op: (?,input_length,vocab_size+1)
 
 output = op_dense(add)
-print('output:', output)
+# print('output:', output)
 
 #  网络搭建完毕！
 model = tf.keras.Model(inputs=[image1, image2, caption], outputs=output)
 print(model.summary())
 
 # 保存模型结构图
-model_png = './model.png'
+model_png = args.modelPng_save
 tf.keras.utils.plot_model(model, to_file=model_png, show_shapes=True)
 
 
@@ -191,9 +208,9 @@ model.compile(optimizer=optimizer, loss=tf.keras.losses.SparseCategoricalCrossen
 
 tf.keras.backend.clear_session()
 tb_filename = 'Simple_Encoder_Decoder/'
-tb_file = os.path.join('../Medical_image_Reporting', tb_filename)
-model_filename = 'Simple_Encoder_Decoder.h5'
-model_save = os.path.join('../Medical_image_Reporting', model_filename)
+tb_file = os.path.join(args.modelSave_path, tb_filename)
+model_filename = 'Simple_Encoder_Decoder_0.h5'
+model_save = os.path.join(args.modelSave_path, model_filename)
 my_callbacks = [tf.keras.callbacks.EarlyStopping(patience=5, verbose=2),
                 tf.keras.callbacks.ModelCheckpoint(filepath=model_save, save_best_only=True,
                                                    save_weights_only=True, verbose=2),
@@ -201,17 +218,10 @@ my_callbacks = [tf.keras.callbacks.EarlyStopping(patience=5, verbose=2),
                 tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=2,
                                                      min_lr=10 ** -7, verbose=2)]  # from keras documentation
 
-# load data
-folder_name = '../pickle_files'
-file_name = 'train.pkl'
-train = pd.read_pickle(os.path.join(folder_name, file_name))
-file_name = 'test.pkl'
-test = pd.read_pickle(os.path.join(folder_name, file_name))
-
 # DataLoader Part
 input_size = (224, 224)
 batch_size = 100
-tokenizer, max_pad, *_ = tokenizing_analysis(train=train, test=test, visualising=True)
+tokenizer, max_pad, *_ = tokenizing_analysis(train=train, test=test)
 print("max_pad:", max_pad)
 train_dataloader = Dataset(train, input_size=input_size, tokenizer=tokenizer, max_pad=max_pad)
 train_dataloader = Dataloader(train_dataloader, batch_size=batch_size)
@@ -230,6 +240,7 @@ test_dataloader = Dataloader(test_dataloader, batch_size=batch_size)
 
 
 model1 = tf.keras.Model(inputs=[image1, image2, caption], outputs=output)
+print('model_save_path:', model_save)
 model1.load_weights(model_save)
 
 
@@ -317,16 +328,16 @@ def greedy_search_predict(image1, image2, model=model1):
     return tokenizer.sequences_to_texts([a])[0]  # here output would be 1,1 so subscripting to open the array
 
 
-k = -1
-image1, image2 = test['image_1'].iloc[k], test['image_2'].iloc[k]
-print(greedy_search_predict(image1, image2, model=model))
-
-_ = mean_bleu(test, greedy_search_predict)
-
-k = list(_)
-index = 'greedy search'
-result = pd.DataFrame([k], columns=["bleu1", "bleu2", "bleu3", "bleu4"], index=[index])
-print(result)
+# k = -1
+# image1, image2 = test['image_1'].iloc[k], test['image_2'].iloc[k]
+# print(greedy_search_predict(image1, image2, model=model))
+#
+# _ = mean_bleu(test, greedy_search_predict)
+#
+# k = list(_)
+# index = 'greedy search'
+# result = pd.DataFrame([k], columns=["bleu1", "bleu2", "bleu3", "bleu4"], index=[index])
+# print(result)
 
 
 def encoder_op(image1, image2, model=model1):
@@ -418,7 +429,7 @@ test['bleu_1_gs'] = np.zeros(test.shape[0])  # greedy search
 test['bleu_1_bm'] = np.zeros(test.shape[0])  # beam search
 test['prediction_gs'] = np.zeros(test.shape[0])  # greedy search
 test['prediction_bm'] = np.zeros(test.shape[0])  # beam search
-for index, rows in test.iterrows():
+for index, rows in tqdm(test.iterrows(), total=test.shape[0]):
     # greedy search
     predicted_text = greedy_search_predict(rows.image_1, rows.image_2, model1)
     test.loc[index, 'prediction_gs'] = predicted_text
@@ -430,8 +441,8 @@ for index, rows in test.iterrows():
     test.loc[index, 'prediction_bm'] = predicted_text
     test.loc[index, 'bleu_1_bm'] = sentence_bleu(reference, predicted_text.split(), weights=(1, 0, 0, 0))
 
-test['prediction_gs'].value_counts() * 100 / test.shape[0]  # greedy search
-test['prediction_bm'].value_counts() * 100 / test.shape[0]  # beam search
+print(test['prediction_gs'].value_counts() * 100 / test.shape[0])  # greedy search
+print(test['prediction_bm'].value_counts() * 100 / test.shape[0])  # beam search
 
 
 def final_caption_pred(image1, image2, method="beam", top_k=3, model=model1):
@@ -480,10 +491,10 @@ def inference(image1, image2, true_caption, model=model1, top_k=[3], image_size=
             print("Predicted caption(beam search = %i): '%s'" % (i, beam_caption))
 
 
-i = test[test['bleu_1_gs']>0.8].sample(5).index
+i = test[test['bleu_1_gs'] > 0.0].sample(5).index
 for k in i:
-  image1,image2 = test['image_1'][k],test['image_2'][k]
-  true_caption = test['impression'][k]
-  inference(image1,image2,true_caption)
+    image1, image2 = test['image_1'][k], test['image_2'][k]
+    true_caption = test['impression'][k]
+    inference(image1, image2, true_caption)
 
 print('ok')
