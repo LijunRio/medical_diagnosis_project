@@ -238,12 +238,13 @@ class BaseLine(object):
                                 axis=0)  # introduce batch and resize
         image2 = tf.expand_dims(cv2.resize(image2, self.input_size, interpolation=cv2.INTER_NEAREST), axis=0)
 
-        image1 = model.get_layer('image_encoder')(image1)  # output from chexnet
-        image2 = model.get_layer('image_encoder')(image2)
+        image1 = model.get_layer('image1')(image1)  # output from chexnet
+        image2 = model.get_layer('image2')(image2)
 
         concat = model.get_layer('concatenate')([image1, image2])
         image_dense = model.get_layer('Image_dense')(concat)
         bk_feat = tf.keras.backend.expand_dims(image_dense, axis=1)
+        print(bk_feat.shape)
         states = [image_dense, image_dense]
         return bk_feat, states
 
@@ -404,9 +405,9 @@ class BaseLine(object):
 if __name__ == '__main__':
     baseline = BaseLine(print_model=True, draw_model=True)
     # baseline.model()
-    baseline.train()
-    # _, image1, image2, caption,output = baseline.model()
-    # model1 = tf.keras.Model(inputs=[image1, image2, caption], outputs=output)
-    # model1.load_weights(os.path.join(args.modelSave_path, 'Simple_Encoder_Decoder_0.h5'))
-    # print(model1.layers)
-    # baseline.predict(model=model1)
+    # baseline.train()
+    _, image1, image2, caption,output = baseline.model()
+    model1 = tf.keras.Model(inputs=[image1, image2, caption], outputs=output)
+    model1.load_weights(os.path.join(args.modelSave_path, 'Simple_Encoder_Decoder_0.h5'))
+    print(model1.layers)
+    baseline.predict(model=model1)
