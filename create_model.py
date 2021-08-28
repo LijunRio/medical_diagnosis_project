@@ -391,5 +391,5 @@ def function2(true_caption, image1, image2):
     return predicted
 
 
-# train()
-create_chexnet()
+train()
+# create_chexnet()
