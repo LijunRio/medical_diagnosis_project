@@ -33,6 +33,7 @@ def create_chexnet(chexnet_weights=chexnet_weights, input_size=(224, 224)):
     chexnet = tf.keras.Model(inputs=model.input, outputs=chexnet.layers[
         -3].output)  # we will be taking the 3rd last layer (here it is layer before global avgpooling)
     # since we are using attention here
+    print('create_checknet!')
     return chexnet
 
 
@@ -389,4 +390,5 @@ def function2(true_caption, image1, image2):
     return predicted
 
 
-train()
+# train()
+create_chexnet()
