@@ -5,23 +5,25 @@ from yacs.config import CfgNode as CN
 config = CN()
 
 """ ============== Path Config ================= """
-# # 服务器path
-# config.chexnet_weights = '../model/brucechou1983_CheXNet_Keras_0.3.0_weights.h5'
-# config.data_folder = '../pickle_files'
-# config.glove_path = '../glove.6B.300d.txt'
-# config.modelPng_save = './model2.png'
-# config.modelSave_path = '../Medical_image_Reporting'
-
-
-# local path
-config.chexnet_weights = 'D:/RIO/Code/data/chexnet/brucechou1983_CheXNet_Keras_0.3.0_weights.h5'
-config.data_folder = '../data/pickle_files'
-config.glove_path = 'D:/RIO/Code/data/glove/glove.6B.300d.txt'
+# 服务器path
+config.chexnet_weights = '../model/brucechou1983_CheXNet_Keras_0.3.0_weights.h5'
+config.data_folder = '../pickle_files'
+config.glove_path = '../glove.6B.300d.txt'
 config.modelPng_save = './model2.png'
-config.modelSave_path = 'D:\RIO\Code\data\model'
+config.modelSave_path = '../Medical_image_Reporting'
 config.image_folder = '../data/image'
-config.finalPkl_ph = '../data/pickle_files'
-config.reports_folder = "../data/ecgen-radiology"
+config.reports_folder = "../data/report"
+
+
+# # local path
+# config.chexnet_weights = 'D:/RIO/Code/data/chexnet/brucechou1983_CheXNet_Keras_0.3.0_weights.h5'
+# config.data_folder = '../data/pickle_files'
+# config.glove_path = 'D:/RIO/Code/data/glove/glove.6B.300d.txt'
+# config.modelPng_save = './model2.png'
+# config.modelSave_path = 'D:\RIO\Code\data\model'
+# config.image_folder = '../data/image'
+# config.finalPkl_ph = '../data/pickle_files'
+# config.reports_folder = "../data/ecgen-radiology"
 
 # hyper parameter
 config.embedding_dim = 300
