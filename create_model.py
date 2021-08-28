@@ -207,8 +207,8 @@ def create_model():
     embedding_dim = args.embedding_dim
     dense_dim = args.dense_dim
     dropout_rate = args.dropout_rate
-    train_df = pd.read_pickle(os.path.join(args.data_folder, 'train.pkl'))
-    test_df = pd.read_pickle(os.path.join(args.data_folder, 'test.pkl'))
+    train_df = pd.read_pickle(os.path.join(args.finalPkl_ph, 'train.pkl'))
+    test_df = pd.read_pickle(os.path.join(args.finalPkl_ph, 'test.pkl'))
 
     tokenizer, max_pad, test_captions, vocab_size, start_index, end_index = tokenizing_analysis(train_df, test_df)
 
@@ -280,8 +280,8 @@ def get_bleu(reference, prediction):
 
 def train():
     model, tokenizer = create_model()
-    train_df = pd.read_pickle(os.path.join(args.data_folder, 'train.pkl'))
-    test_df = pd.read_pickle(os.path.join(args.data_folder, 'test.pkl'))
+    train_df = pd.read_pickle(os.path.join(args.finalPkl_ph, 'train.pkl'))
+    test_df = pd.read_pickle(os.path.join(args.finalPkl_ph, 'test.pkl'))
     print('model--get!')
     print(model.summary())
     optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr)  # optimizer
