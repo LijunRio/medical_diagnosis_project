@@ -6,7 +6,7 @@ config = CN()
 
 """ ============== Path Config ================= """
 # 服务器path
-config.chexnet_weights = '../model/cd .'
+config.chexnet_weights = '../model'
 config.data_folder = '../pickle_files'
 config.glove_path = '../glove.6B.300d.txt'
 config.modelPng_save = './model2.png'
