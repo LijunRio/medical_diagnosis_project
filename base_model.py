@@ -192,12 +192,12 @@ class BaseLine(object):
                                   max_pad=self.max_pad)
         test_dataloader = Dataloader(test_dataloader, batch_size=self.batch_size)
 
-        # with tf.device("/device:GPU:0"):
-        model.fit(train_dataloader,
-                  validation_data=test_dataloader,
-                  epochs=10,
-                  callbacks=my_callbacks
-                  )
+        with tf.device("/device:GPU:0"):
+            model.fit(train_dataloader,
+                      validation_data=test_dataloader,
+                      epochs=10,
+                      callbacks=my_callbacks
+                      )
 
     def get_bleu(self, reference, prediction):
         """

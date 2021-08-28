@@ -7,6 +7,8 @@ from nltk.translate.bleu_score import sentence_bleu
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Input, Embedding, Concatenate, \
   BatchNormalization, Dropout, Add, GRU, AveragePooling2D
 from config import config as args
+import os
+from DataLoader import Dataloader, Dataset
 
 chexnet_weights = args.chexnet_weights
 
@@ -275,6 +277,39 @@ def get_bleu(reference, prediction):
 
     return bleu1, bleu2, bleu3, bleu4
 
+def train():
+    model, tokenizer = create_model()
+    train_df = pd.read_pickle(os.path.join(args.data_folder, 'train.pkl'))
+    test_df = pd.read_pickle(os.path.join(args.data_folder, 'test.pkl'))
+    print('model--get!')
+    print(model.summary())
+    optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr)  # optimizer
+    model.compile(optimizer=optimizer, loss=tf.keras.losses.SparseCategoricalCrossentropy(), metrics=['accuracy'])
+
+    model_save = args.modelSave_path
+    print('model save path:', model_save)
+    # verbose=2每个epoch输出一行记录
+    my_callbacks = [tf.keras.callbacks.EarlyStopping(patience=5, verbose=2),  # patience 训练将停止后没有改进的epoch数
+                    tf.keras.callbacks.ModelCheckpoint(filepath=model_save, save_best_only=True,
+                                                       save_weights_only=True, verbose=2),
+                    tf.keras.callbacks.TensorBoard(histogram_freq=1, log_dir=os.path.join(args.modelSave_path,
+                                                                                          'Simple_Encoder_Decoder/')),
+                    tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=2,
+                                                         min_lr=10 ** -7, verbose=2)]  # from keras documentation
+    train_dataloader = Dataset(train_df, input_size=args.input_size, tokenizer=tokenizer,
+                               max_pad=args.max_pad)
+    train_dataloader = Dataloader(train_dataloader, batch_size=args.batch_size)
+    test_dataloader = Dataset(test_df, input_size=args.input_size, tokenizer=tokenizer,
+                              max_pad=args.max_pad)
+    test_dataloader = Dataloader(test_dataloader, batch_size=args.batch_size)
+
+    with tf.device("/device:GPU:0"):
+        model.fit(train_dataloader,
+                  validation_data=test_dataloader,
+                  epochs=10,
+                  callbacks=my_callbacks
+                  )
+
 
 def predict1(image1, image2=None, model_tokenizer=None):
     """given image1 and image 2 filepaths returns the predicted caption,
@@ -351,3 +386,6 @@ def function2(true_caption, image1, image2):
         predicted = predicted.append(caption, ignore_index=True)
 
     return predicted
+
+
+train()
