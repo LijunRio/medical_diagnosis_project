@@ -5,7 +5,7 @@ import pandas as pd
 import tensorflow as tf
 from nltk.translate.bleu_score import sentence_bleu
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Input, Embedding, Concatenate, \
-  BatchNormalization, Dropout, Add, GRU, AveragePooling2D
+    BatchNormalization, Dropout, Add, GRU, AveragePooling2D
 from config import config as args
 import os
 from DataLoader import Dataloader, Dataset
@@ -183,8 +183,9 @@ class decoder(tf.keras.Model):
 
     @tf.function
     def call(self, encoder_output, caption):
-      # ,decoder_h,decoder_c): #caption : (None,max_pad), encoder_output: (None,dense_dim)
-        decoder_h, decoder_c = tf.zeros_like(encoder_output[:, 0]), tf.zeros_like(encoder_output[:, 0])  # decoder_h, decoder_c
+        # ,decoder_h,decoder_c): #caption : (None,max_pad), encoder_output: (None,dense_dim)
+        decoder_h, decoder_c = tf.zeros_like(encoder_output[:, 0]), tf.zeros_like(
+            encoder_output[:, 0])  # decoder_h, decoder_c
         output_array = tf.TensorArray(tf.float32, size=self.max_pad)
         for timestep in range(self.max_pad):  # iterating through all timesteps ie through max_pad
             output, decoder_h, attention_weights = self.onestepdecoder(caption[:, timestep:timestep + 1],
@@ -197,7 +198,7 @@ class decoder(tf.keras.Model):
         return self.output_array
 
 
-def create_model():
+def create_model(train_flag=False):
     """
   creates the best model ie the attention model
   and returns the model after loading the weights
@@ -224,9 +225,10 @@ def create_model():
 
     output = decoder(max_pad, embedding_dim, dense_dim, batch_size, vocab_size)(encoder_output, caption)
     model = tf.keras.Model(inputs=[image1, image2, caption], outputs=output)
-    model_filename = 'Encoder_Decoder_global_attention.h5'
-    model_save = model_filename
-    model.load_weights(model_save)
+    if not train_flag:
+        model_filename = 'Encoder_Decoder_global_attention.h5'
+        model_save = model_filename
+        model.load_weights(model_save)
 
     return model, tokenizer
 
@@ -280,8 +282,9 @@ def get_bleu(reference, prediction):
 
     return bleu1, bleu2, bleu3, bleu4
 
+
 def train():
-    model, tokenizer = create_model()
+    model, tokenizer = create_model(train_flag=True)
     train_df = pd.read_pickle(os.path.join(args.finalPkl_ph, 'train.pkl'))
     test_df = pd.read_pickle(os.path.join(args.finalPkl_ph, 'test.pkl'))
     print('model--get!')
