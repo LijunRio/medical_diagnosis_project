@@ -19,6 +19,7 @@ def create_chexnet(chexnet_weights=chexnet_weights, input_size=(224, 224)):
   chexnet_weights: weights value in .h5 format of chexnet
   creates a chexnet model with preloaded weights present in chexnet_weights file
   """
+    print('chexnet_weights:', chexnet_weights)
     model = tf.keras.applications.DenseNet121(include_top=False, input_shape=input_size + (3,))
     # importing densenet the last layer will be a relu activation layer
 
