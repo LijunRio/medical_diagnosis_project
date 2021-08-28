@@ -47,11 +47,13 @@ class Image_encoder(tf.keras.layers.Layer):
         self.chexnet_weights = args.chexnet_weights
         self.chexnet = create_chexnet(self.chexnet_weights)
         self.chexnet.trainable = False
-        for i in range(10):  # the last 10 layers of chexnet will be trained
-            self.chexnet.layers[-i].trainable = True
+        # for i in range(10):  # the last 10 layers of chexnet will be trained
+        #     self.chexnet.layers[-i].trainable = True
 
     def call(self, data):
         op = self.chexnet(data)
+        # op = self.avgpool(op)  # op shape (None,3,3,1024)
+        # op = tf.reshape(op, shape=(-1, op.shape[1] * op.shape[2], op.shape[3]))  # op shape: (None,9,1024)
         return op
 
 
@@ -127,15 +129,21 @@ class BaseLine(object):
         embedding = Embedding(input_dim=self.vocab_size + 1,
                               output_dim=self.embedding_dim,
                               input_length=self.max_pad,
-                              mask_zero=True,
+                              mask_zero=True,  # 在这使用了mask
                               weights=[embedding_matrix],
                               name='embedding'
                               )
         # （None, 28, 300）
         embed_op = embedding(caption)  # op_shape: (None,input_length=28,embedding_dim=300)
-        lstm_layer = LSTM(units=self.lstm_units, return_sequences=True, return_state=True)
-        # lstm_op (None, 28, 512), lstm_h(None, 512), lstm_c(None, 512)
+        lstm_layer = LSTM(units=self.lstm_units, return_sequences=True, return_state=True)  # 尝试使用CUdnnlstm
         lstm_op, lstm_h, lstm_c = lstm_layer(embed_op, initial_state=[image_bkbone, image_bkbone])
+
+        # 如果使用cudnnlstm的话，之前的embbeding层就不可以使用mask_zero=True
+        # lstm_layer = tf.compat.v1.keras.layers.CuDNNLSTM(self.lstm_units, return_sequences=True)
+        # lstm_op (None, 28, 512), lstm_h(None, 512), lstm_c(None, 512)
+        # print('embed_op.shape', embed_op.shape)
+        # print('img_bkbone.shape', image_bkbone.shape)
+        # lstm_op = lstm_layer(embed_op, initial_state=[image_bkbone, image_bkbone])
 
         """
         NLP CV融合
@@ -157,8 +165,9 @@ class BaseLine(object):
 
         return model, image1, image2, caption, output
 
-    def train(self):
-        model, *_ = self.model()
+    def train(self, model):
+        # model, *_ = self.model()
+        print('model--get!')
         optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr)  # optimizer
         model.compile(optimizer=optimizer, loss=tf.keras.losses.SparseCategoricalCrossentropy(), metrics=['accuracy'])
 
@@ -166,8 +175,10 @@ class BaseLine(object):
         tb_file = os.path.join(args.modelSave_path, tb_filename)
         model_filename = 'Simple_Encoder_Decoder3.h5'
         model_save = os.path.join(args.modelSave_path, model_filename)
+        print('model save path:', model_save)
 
-        my_callbacks = [tf.keras.callbacks.EarlyStopping(patience=5, verbose=2),
+        # verbose=2每个epoch输出一行记录
+        my_callbacks = [tf.keras.callbacks.EarlyStopping(patience=5, verbose=2),  # patience 训练将停止后没有改进的epoch数
                         tf.keras.callbacks.ModelCheckpoint(filepath=model_save, save_best_only=True,
                                                            save_weights_only=True, verbose=2),
                         tf.keras.callbacks.TensorBoard(histogram_freq=1, log_dir=tb_file),
@@ -181,12 +192,12 @@ class BaseLine(object):
                                   max_pad=self.max_pad)
         test_dataloader = Dataloader(test_dataloader, batch_size=self.batch_size)
 
-        with tf.device("/device:GPU:0"):
-            model.fit(train_dataloader,
-                      validation_data=test_dataloader,
-                      epochs=10,
-                      callbacks=my_callbacks
-                      )
+        # with tf.device("/device:GPU:0"):
+        model.fit(train_dataloader,
+                  validation_data=test_dataloader,
+                  epochs=10,
+                  callbacks=my_callbacks
+                  )
 
     def get_bleu(self, reference, prediction):
         """
@@ -407,11 +418,11 @@ class BaseLine(object):
 
 
 if __name__ == '__main__':
-    baseline = BaseLine(print_model=True, draw_model=True)
-    # baseline.model()
-    # baseline.train()
-    _, image1, image2, caption,output = baseline.model()
-    model1 = tf.keras.Model(inputs=[image1, image2, caption], outputs=output)
-    model1.load_weights(os.path.join(args.modelSave_path, 'Simple_Encoder_Decoder3.h5'))
-    print(model1.layers)
-    baseline.predict(model=model1)
+    baseline = BaseLine(print_model=True, draw_model=False)
+    model, *_ = baseline.model()
+    baseline.train(model)
+    # _, image1, image2, caption,output = baseline.model()
+    # model1 = tf.keras.Model(inputs=[image1, image2, caption], outputs=output)
+    # model1.load_weights(os.path.join(args.modelSave_path, 'Simple_Encoder_Decoder3.h5'))
+    # print(model1.layers)
+    # baseline.predict(model=model1)

@@ -8,6 +8,7 @@ import seaborn as sns
 import imgaug.augmenters as iaa
 import tensorflow as tf
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+from config import  config as args
 
 
 def tokenizing_analysis(train, test, visualising=False):
@@ -157,7 +158,7 @@ if __name__ == '__main__':
     #     dropout_rate = 0.2
     #
     # load data
-    folder_name = '../pickle_files'
+    folder_name = args.finalPkl_ph
     file_name = 'train.pkl'
     train = pd.read_pickle(os.path.join(folder_name, file_name))
     file_name = 'test.pkl'

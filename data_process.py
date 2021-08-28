@@ -11,6 +11,7 @@ from sklearn.utils import resample
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import seaborn as sns
+from config import config as args
 
 
 def find_association(reports_folder):
@@ -235,7 +236,7 @@ def process_missiing_value(df, image_folder):
         try:
             im1_size.append(cv2.imread(os.path.join(image_folder, row.get('image_1'))).shape[:2])
             im2_size.append(cv2.imread(os.path.join(image_folder, row.get('image_2'))).shape[:2])
-        except :
+        except:
             print(os.path.join(image_folder, row.get('image_1')))
             print(os.path.join(image_folder, row.get('image_2')))
 
@@ -245,7 +246,7 @@ def process_missiing_value(df, image_folder):
     df['im2_width'] = [i[1] for i in im2_size]
 
     # save the final data to pkl file
-    df.to_pickle("../pickle_files/df_final.pkl")
+    df.to_pickle(os.path.join(args.finalPkl_ph, 'df_final.pkl'))
     print('-' * 30)
     print('final data shape:', df.shape)
     print('after processing missing value')
@@ -371,12 +372,12 @@ def split_dataset(df, folder_name):
 
 if __name__ == '__main__':
     # load image folder
-    image_folder = '../data/image'  # path to folder containing images
+    image_folder = args.image_folder  # path to folder containing images
     total_images = len(os.listdir(image_folder))
     print('The number of images in data are: %i' % total_images)
 
     # load reports folder
-    reports_folder = "../data/ecgen-radiology"
+    reports_folder = args.reports_folder
     total_reports = len(os.listdir(reports_folder))
     print('The number of reports in the data are: %i' % (total_reports))
 
@@ -387,10 +388,10 @@ if __name__ == '__main__':
     print('No2. processing missing value and save final pikle file!')
 
     # data impression
-    df_final = pd.read_pickle('../pickle_files/df_final.pkl')
+    df_final = pd.read_pickle(os.path.join(args.finalPkl_ph, 'df_final.pkl'))
     # evaluate_height_weight(df)
     # wordcloud_analysis(df)
 
-    folder_name = '../pickle_files'
+    folder_name = args.finalPkl_ph
     split_dataset(df=df_final, folder_name=folder_name)
     print('No3. read final pikle file and split dataset')
