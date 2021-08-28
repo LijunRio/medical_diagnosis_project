@@ -294,11 +294,14 @@ def train():
     optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr)  # optimizer
     model.compile(optimizer=optimizer, loss=tf.keras.losses.SparseCategoricalCrossentropy(), metrics=['accuracy'])
 
-    model_save =  os.path.join(args.modelSave_path, 'Simple_Encoder_Decoder3.h5')
+    # model_save =  os.path.join(args.modelSave_path, 'Encoder_Decoder_global_attention.h5')
+    model_save = args.modelSave_path
     print('model save path:', model_save)
     # verbose=2每个epoch输出一行记录
     my_callbacks = [tf.keras.callbacks.EarlyStopping(patience=5, verbose=2),  # patience 训练将停止后没有改进的epoch数
-                    tf.keras.callbacks.ModelCheckpoint(filepath=model_save, save_best_only=True,
+                    tf.keras.callbacks.ModelCheckpoint(filepath=os.path.join(args.modelSave_path,
+                                                                            'Encoder_Decoder_global_attention.h5'),
+                                                       save_best_only=True,
                                                        save_weights_only=True, verbose=2),
                     tf.keras.callbacks.TensorBoard(histogram_freq=1, log_dir=os.path.join(args.modelSave_path,
                                                                                           'Simple_Encoder_Decoder/')),
