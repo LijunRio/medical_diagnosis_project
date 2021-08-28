@@ -9,6 +9,7 @@ from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Input, Embedd
 from config import config as args
 import os
 from DataLoader import Dataloader, Dataset
+from DataLoader import tokenizing_analysis
 
 chexnet_weights = args.chexnet_weights
 
@@ -201,15 +202,15 @@ def create_model():
   and also the tokenizer
   """
     # hyperparameters
-    input_size = (224, 224)
-    tokenizer = joblib.load('tokenizer.pkl')
-    max_pad = 29
-    batch_size = 100
-    vocab_size = len(tokenizer.word_index)
-    embedding_dim = 300
-    dense_dim = 512
-    lstm_units = dense_dim
-    dropout_rate = 0.2
+    input_size = args.input_size
+    batch_size = args.batch_size
+    embedding_dim = args.embedding_dim
+    dense_dim = args.dense_dim
+    dropout_rate = args.dropout_rate
+    train_df = pd.read_pickle(os.path.join(args.data_folder, 'train.pkl'))
+    test_df = pd.read_pickle(os.path.join(args.data_folder, 'test.pkl'))
+
+    tokenizer, max_pad, test_captions, vocab_size, start_index, end_index = tokenizing_analysis(train_df, test_df)
 
     tf.keras.backend.clear_session()
     image1 = Input(shape=(input_size + (3,)))  # shape = 224,224,3
@@ -228,7 +229,7 @@ def create_model():
     return model, tokenizer
 
 
-def greedy_search_predict(image1, image2, model, tokenizer, input_size=(224, 224)):
+def greedy_search_predict(image1, image2, model, tokenizer, input_size=args.input_size):
     """
   Given paths to two x-ray images predicts the impression part of the x-ray in a greedy search algorithm
   """
@@ -247,7 +248,7 @@ def greedy_search_predict(image1, image2, model, tokenizer, input_size=(224, 224
     decoder_h, decoder_c = tf.zeros_like(enc_op[:, 0]), tf.zeros_like(enc_op[:, 0])
     a = []
     pred = []
-    max_pad = 29
+    max_pad = args.max_pad
     for i in range(max_pad):
         if i == 0:  # if first word
             caption = np.array(tokenizer.texts_to_sequences(['<cls>']))  # shape: (1,1)
