@@ -294,7 +294,7 @@ def train():
     optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr)  # optimizer
     model.compile(optimizer=optimizer, loss=tf.keras.losses.SparseCategoricalCrossentropy(), metrics=['accuracy'])
 
-    model_save = args.modelSave_path
+    model_save =  os.path.join(args.modelSave_path, 'Simple_Encoder_Decoder3.h5')
     print('model save path:', model_save)
     # verbose=2每个epoch输出一行记录
     my_callbacks = [tf.keras.callbacks.EarlyStopping(patience=5, verbose=2),  # patience 训练将停止后没有改进的epoch数
@@ -396,5 +396,5 @@ def function2(true_caption, image1, image2):
     return predicted
 
 
-train()
+# train()
 # create_chexnet()
