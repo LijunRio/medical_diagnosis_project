@@ -11,7 +11,7 @@ import os
 from DataLoader import Dataloader, Dataset
 from DataLoader import tokenizing_analysis
 
-chexnet_weights = args.chexnet_weights
+chexnet_weights = os.join(args.chexnet_weights, 'brucechou1983_CheXNet_Keras_0.3.0_weights.h5')
 
 
 def create_chexnet(chexnet_weights=chexnet_weights, input_size=(224, 224)):
