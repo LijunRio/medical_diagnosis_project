@@ -229,8 +229,9 @@ def create_model(train_flag=False):
         model_filename = 'Encoder_Decoder_global_attention.h5'
         model_save = model_filename
         model.load_weights(model_save)
+        return model, tokenizer
 
-    return model, tokenizer
+    return model, tokenizer, max_pad
 
 
 def greedy_search_predict(image1, image2, model, tokenizer, input_size=args.input_size):
@@ -252,7 +253,8 @@ def greedy_search_predict(image1, image2, model, tokenizer, input_size=args.inpu
     decoder_h, decoder_c = tf.zeros_like(enc_op[:, 0]), tf.zeros_like(enc_op[:, 0])
     a = []
     pred = []
-    max_pad = args.max_pad
+    # max_pad = args.max_pad
+    max_pad = 28  # 暂时写死
     for i in range(max_pad):
         if i == 0:  # if first word
             caption = np.array(tokenizer.texts_to_sequences(['<cls>']))  # shape: (1,1)
@@ -284,7 +286,7 @@ def get_bleu(reference, prediction):
 
 
 def train():
-    model, tokenizer = create_model(train_flag=True)
+    model, tokenizer, max_pad = create_model(train_flag=True)
     train_df = pd.read_pickle(os.path.join(args.finalPkl_ph, 'train.pkl'))
     test_df = pd.read_pickle(os.path.join(args.finalPkl_ph, 'test.pkl'))
     print('model--get!')
@@ -303,10 +305,10 @@ def train():
                     tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=2,
                                                          min_lr=10 ** -7, verbose=2)]  # from keras documentation
     train_dataloader = Dataset(train_df, input_size=args.input_size, tokenizer=tokenizer,
-                               max_pad=args.max_pad)
+                               max_pad=max_pad)
     train_dataloader = Dataloader(train_dataloader, batch_size=args.batch_size)
     test_dataloader = Dataset(test_df, input_size=args.input_size, tokenizer=tokenizer,
-                              max_pad=args.max_pad)
+                              max_pad=max_pad)
     test_dataloader = Dataloader(test_dataloader, batch_size=args.batch_size)
 
     with tf.device("/device:GPU:0"):
