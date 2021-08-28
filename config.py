@@ -6,13 +6,14 @@ config = CN()
 
 """ ============== Path Config ================= """
 # 服务器path
-config.chexnet_weights = '../model/brucechou1983_CheXNet_Keras_0.3.0_weights.h5'
+config.chexnet_weights = '../model/cd .'
 config.data_folder = '../pickle_files'
 config.glove_path = '../glove.6B.300d.txt'
 config.modelPng_save = './model2.png'
 config.modelSave_path = '../Medical_image_Reporting'
 config.image_folder = '../data/image'
 config.reports_folder = "../data/report"
+config.finalPkl_ph = '../data/pickle_files'
 
 
 # # local path
