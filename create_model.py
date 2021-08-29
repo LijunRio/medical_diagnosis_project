@@ -426,13 +426,11 @@ def predict_with_detail(true_caption, image1, image2=None, model_tokenizer=None)
 
 
 def get_detail_result(image1, image2, true_caption, model_tokenizer=None):
-    for i in true_caption:
-        print(i)
     if model_tokenizer is None:
         model_tokenizer = list(create_model())
     result = pd.DataFrame(columns=['image1', 'image2', 'GT', 'Predict',
                                    'bleu1', 'bleu2', 'bleu3', 'bleu4'])
-    for i in true_caption:
+    for i in zip(true_caption):
         print(i)
     count = 0
     for c, i1, i2 in tqdm(zip(true_caption, image1, image2)):
