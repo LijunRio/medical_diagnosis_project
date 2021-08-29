@@ -58,9 +58,7 @@ def predict(image_1, image_2, model_tokenizer, predict_button=predict_button):
 
 
 def predict_sample(model_tokenizer, folder='./test_images'):
-    no_files = len(os.listdir(folder))
-    file = np.random.randint(1, no_files)
-    file_path = os.path.join(folder, str(file))
+    file_path = os.path.join(folder, str(1))
     if len(os.listdir(file_path)) == 2:
         image_1 = os.path.join(file_path, os.listdir(file_path)[0])
         image_2 = os.path.join(file_path, os.listdir(file_path)[1])
@@ -68,7 +66,7 @@ def predict_sample(model_tokenizer, folder='./test_images'):
     else:
         image_1 = os.path.join(file_path, os.listdir(file_path)[0])
         image_2 = image_1
-    predict(image_1, image_2, model_tokenizer, True)
+    predict(image_1, image_2, model_tokenizer)
 
 
 model_tokenizer = create_model()
