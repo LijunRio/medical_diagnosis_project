@@ -12,6 +12,7 @@ def create_model():
 
 
 def predict(image_1, image_2, model_tokenizer):
+    start = time.process_time()
     image_1 = Image.open(image_1).convert("RGB")  # converting to 3 channels
     image_1 = np.array(image_1) / 255
     if image_2 is None:
