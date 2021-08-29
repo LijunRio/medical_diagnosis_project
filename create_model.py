@@ -439,9 +439,7 @@ def get_detail_result(image1, image2, true_caption, model_tokenizer=None):
         blue_score, predicted_caption = predict_with_detail(c, i1, i2, model_tokenizer)
         final = [im1, im2, c, predicted_caption]
         final.extend(blue_score)
-        result.append(pd.DataFrame([final], columns=['image1', 'image2', 'GT', 'Predict',
-                                                     'bleu1', 'bleu2', 'bleu3', 'bleu4']),
-                      ignore_index=True)
+        result.append(final,ignore_index=True)
         count += 1
     return result
 
