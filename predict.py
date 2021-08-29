@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from config import config as args
-from create_model import function1
+from create_model import function1, get_detail_result
 from tqdm import tqdm
 import cv2
 
@@ -11,6 +11,9 @@ test = pd.read_pickle(os.path.join(args.finalPkl_ph, file_name))
 print(test.columns.values.tolist())
 image1_pth = test['image_1'].values.tolist()
 image2_pth = test['image_2'].values.tolist()
+impression_list = test['impression_op'].values.tolist()
+for i in impression_list:
+    print(i)
 
 # # checkout file
 # image_folder = args.image_folder  # path to folder containing images
@@ -23,6 +26,6 @@ image2_pth = test['image_2'].values.tolist()
 #     if img2 is None:
 #         print('None:', file2)
 
-function1(image1_pth, image2_pth)
+# function1(image1_pth, image2_pth)
 
-
+# get_detail_result(image1_pth, image2_pth)

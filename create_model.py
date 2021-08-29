@@ -331,8 +331,8 @@ def predict1(image1, image2=None, model_tokenizer=None):
         image2 = image1
 
     try:
-        image1 = cv2.imread(image1,cv2.IMREAD_UNCHANGED)/255
-        image2 = cv2.imread(image2,cv2.IMREAD_UNCHANGED)/255
+        image1 = cv2.imread(image1, cv2.IMREAD_UNCHANGED) / 255
+        image2 = cv2.imread(image2, cv2.IMREAD_UNCHANGED) / 255
     except:
         return print("Must be an image")
 
@@ -365,9 +365,10 @@ def predict2(true_caption, image1, image2=None, model_tokenizer=None):
         model, tokenizer = model_tokenizer[0], model_tokenizer[1]
     predicted_caption = greedy_search_predict(image1, image2, model, tokenizer)
 
-    _ = get_bleu(true_caption, predicted_caption)
-    _ = list(_)
-    return pd.DataFrame([_], columns=['bleu1', 'bleu2', 'bleu3', 'bleu4'])
+    blue_score = get_bleu(true_caption, predicted_caption)
+    blue_score = list(blue_score)
+    # final = blue_score.append(predicted_caption)
+    return pd.DataFrame([blue_score], columns=['bleu1', 'bleu2', 'bleu3', 'bleu4'])
 
 
 def function1(image1, image2, model_tokenizer=None):
@@ -400,5 +401,40 @@ def function2(true_caption, image1, image2):
 
     return predicted
 
+
+def predict_with_detail(true_caption, image1, image2=None, model_tokenizer=None):
+    if image2 is None:  # if only 1 image file is given
+        image2 = image1
+
+    try:
+        image1 = cv2.imread(image1, cv2.IMREAD_UNCHANGED) / 255
+        image2 = cv2.imread(image2, cv2.IMREAD_UNCHANGED) / 255
+    except:
+        return print("Must be an image")
+
+    if model_tokenizer is None:
+        model, tokenizer = create_model()
+    else:
+        model, tokenizer = model_tokenizer[0], model_tokenizer[1]
+    predicted_caption = greedy_search_predict(image1, image2, model, tokenizer)
+
+    blue_score = get_bleu(true_caption, predicted_caption)
+    blue_score = list(blue_score)
+
+    return blue_score, predicted_caption
+
+
+def get_detail_result(image1, image2, true_caption, model_tokenizer=None):
+    if model_tokenizer is None:
+        model_tokenizer = list(create_model())
+    predicted_caption = []
+    for c, i1, i2 in zip(true_caption, image1, image2):
+        im1 = i1.split('/')[-1]
+        im2 = i2.split('/')[-1]
+        print('im1:', im1, ' im2:', im2, ' gt:', c)
+
+        # blue_score, predicted_caption = predict_with_detail(c, i1, i2, model_tokenizer)
+
 # train()
 # create_chexnet()
+
