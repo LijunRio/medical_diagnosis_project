@@ -27,4 +27,6 @@ impression_list = test['impression'].values.tolist()
 
 # function1(image1_pth, image2_pth)
 
-get_detail_result(image1_pth, image2_pth, impression_list)
+result = get_detail_result(image1_pth, image2_pth, impression_list)
+result.to_csv('test_result.csv')
+print('save result to csv file !')

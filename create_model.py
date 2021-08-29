@@ -10,6 +10,7 @@ from config import config as args
 import os
 from DataLoader import Dataloader, Dataset
 from DataLoader import tokenizing_analysis
+from tqdm import tqdm
 
 chexnet_weights = os.path.join(args.chexnet_weights, 'brucechou1983_CheXNet_Keras_0.3.0_weights.h5')
 
@@ -428,12 +429,15 @@ def get_detail_result(image1, image2, true_caption, model_tokenizer=None):
     if model_tokenizer is None:
         model_tokenizer = list(create_model())
     predicted_caption = []
-    for c, i1, i2 in zip(true_caption, image1, image2):
+    for c, i1, i2 in tqdm(zip(true_caption, image1, image2)):
         im1 = i1.split('/')[-1]
         im2 = i2.split('/')[-1]
-        print('im1:', im1, ' im2:', im2, ' gt:', c)
+        blue_score, predicted_caption = predict_with_detail(c, i1, i2, model_tokenizer)
+        final = [im1, im2, c, predicted_caption]
+        final.extend(blue_score)
+        return pd.DataFrame([final], columns=['image1', 'image2', 'GT', 'Predict',
+                                              'bleu1', 'bleu2', 'bleu3', 'bleu4'])
 
-        # blue_score, predicted_caption = predict_with_detail(c, i1, i2, model_tokenizer)
 
 # train()
 # create_chexnet()
