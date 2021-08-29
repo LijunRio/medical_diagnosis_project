@@ -430,11 +430,8 @@ def get_detail_result(image1, image2, true_caption, model_tokenizer=None):
         model_tokenizer = list(create_model())
     result = pd.DataFrame(columns=['image1', 'image2', 'GT', 'Predict',
                                    'bleu1', 'bleu2', 'bleu3', 'bleu4'])
-    for i in zip(true_caption):
-        print(i)
-    count = 0
+
     for c, i1, i2 in tqdm(zip(true_caption, image1, image2)):
-        if count == 10: return result
         im1 = i1.split('/')[-1]
         im2 = i2.split('/')[-1]
         print(c)
@@ -443,7 +440,6 @@ def get_detail_result(image1, image2, true_caption, model_tokenizer=None):
         final.extend(blue_score)
         result = result.append(pd.DataFrame([final], columns=['image1', 'image2', 'GT', 'Predict',
                                                               'bleu1', 'bleu2', 'bleu3', 'bleu4']), ignore_index=True)
-        count += 1
     return result
 
 # train()
