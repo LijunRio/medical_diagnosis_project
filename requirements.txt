@@ -7,3 +7,10 @@ Pillow
 seaborn
 imgaug
 wordcloud
+yacs
+scikit-image
+cv2
+tensorflow==2.4.1
+h5py==2.10.0
+opencv-python==4.5.3.56
+nltk
