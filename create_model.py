@@ -436,6 +436,7 @@ def get_detail_result(image1, image2, true_caption, model_tokenizer=None):
         if count == 10: return result
         im1 = i1.split('/')[-1]
         im2 = i2.split('/')[-1]
+        print(c)
         blue_score, predicted_caption = predict_with_detail(c, i1, i2, model_tokenizer)
         final = [im1, im2, c, predicted_caption]
         final.extend(blue_score)
