@@ -12,8 +12,8 @@ print(test.columns.values.tolist())
 image1_pth = test['image_1'].values.tolist()
 image2_pth = test['image_2'].values.tolist()
 impression_list = test['impression'].values.tolist()
-for i in impression_list:
-    print(i)
+for i in len(impression_list):
+    print(i, ". ", impression_list[i])
 
 # # checkout file
 # image_folder = args.image_folder  # path to folder containing images
