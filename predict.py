@@ -11,7 +11,7 @@ test = pd.read_pickle(os.path.join(args.finalPkl_ph, file_name))
 print(test.columns.values.tolist())
 image1_pth = test['image_1'].values.tolist()
 image2_pth = test['image_2'].values.tolist()
-impression_list = test['impression'].values.tolist()
+impression_list = test['impression_ip'].values.tolist()
 for i in range(len(impression_list)):
     print(i, ". ", impression_list[i])
 
