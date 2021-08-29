@@ -6,4 +6,4 @@ import pandas
 
 file_name = 'test.pkl'
 test = pd.read_pickle(os.path.join(args.finalPkl_ph, file_name))
-print(test.head)
+print(test.columns.values.tolist())
