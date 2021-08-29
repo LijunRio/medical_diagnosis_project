@@ -25,7 +25,10 @@ def predict(image_1, image_2, model_tokenizer):
     st.markdown(" ### **Impression:**")
     impression = st.empty()
     impression.write(caption[0])
+    print(" ### **Impression:**")
+    print(caption[0])
     time_taken = "Time Taken for prediction: %i seconds" % (time.process_time() - start)
+    print(time_taken)
     st.write(time_taken)
     del image_1, image_2
 
