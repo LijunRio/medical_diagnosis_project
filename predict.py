@@ -8,4 +8,5 @@ file_name = 'test.pkl'
 test = pd.read_pickle(os.path.join(args.finalPkl_ph, file_name))
 print(test.columns.values.tolist())
 image1_pth = test['image_1'].values.tolist()
-print(len(image1_pth))
+image2_pth = test['image_2'].values.tolist()
+print('image1_path:', image1_pth[0])
