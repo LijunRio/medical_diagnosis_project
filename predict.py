@@ -12,8 +12,7 @@ print(test.columns.values.tolist())
 image1_pth = test['image_1'].values.tolist()
 image2_pth = test['image_2'].values.tolist()
 impression_list = test['impression'].values.tolist()
-for i in range(len(impression_list)):
-    print(i, ". ", impression_list[i][:28])
+
 
 # # checkout file
 # image_folder = args.image_folder  # path to folder containing images
@@ -28,4 +27,4 @@ for i in range(len(impression_list)):
 
 # function1(image1_pth, image2_pth)
 
-# get_detail_result(image1_pth, image2_pth)
+get_detail_result(image1_pth, image2_pth, impression_list)
