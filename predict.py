@@ -28,5 +28,6 @@ impression_list = test['impression'].values.tolist()
 # function1(image1_pth, image2_pth)
 
 result = get_detail_result(image1_pth, image2_pth, impression_list)
+print(len(result['image1'].values.tolist()))
 result.to_csv('test_result.csv')
 print('save result to csv file !')
