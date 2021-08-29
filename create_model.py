@@ -439,7 +439,7 @@ def get_detail_result(image1, image2, true_caption, model_tokenizer=None):
         blue_score, predicted_caption = predict_with_detail(c, i1, i2, model_tokenizer)
         final = [im1, im2, c, predicted_caption]
         final.extend(blue_score)
-        result.append(final,ignore_index=True)
+        result = result.append(final, ignore_index=True)
         count += 1
     return result
 
