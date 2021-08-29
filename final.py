@@ -48,9 +48,12 @@ def predict(image_1, image_2, model_tokenizer, predict_button=predict_button):
             st.image([image_1, image_2], width=300)
             caption = cm.function1([image_1], [image_2], model_tokenizer)
             st.markdown(" ### **Impression:**")
+            print(" ### **Impression:**")
+            print(caption[0])
             impression = st.empty()
             impression.write(caption[0])
             time_taken = "Time Taken for prediction: %i seconds" % (time.process_time() - start)
+            print(time_taken)
             st.write(time_taken)
             del image_1, image_2
         else:
