@@ -330,10 +330,10 @@ def predict1(image1, image2=None, model_tokenizer=None):
     if image2 is None:  # if only 1 image file is given
         image2 = image1
 
-      try:
+    try:
         image1 = cv2.imread(image1,cv2.IMREAD_UNCHANGED)/255
         image2 = cv2.imread(image2,cv2.IMREAD_UNCHANGED)/255
-      except:
+    except:
         return print("Must be an image")
 
     if model_tokenizer == None:
