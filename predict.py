@@ -15,7 +15,7 @@ image2_pth = test['image_2'].values.tolist()
 # function1(image1_pth, image2_pth)
 
 image_folder = args.image_folder  # path to folder containing images
-for file1, file2 in tqdm(image1_pth, image2_pth):
+for file1, file2 in tqdm(zip(image1_pth, image2_pth)):
 
     img = cv2.imread(file1)
     if img is None:
