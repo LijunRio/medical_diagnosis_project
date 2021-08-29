@@ -2,7 +2,8 @@ import pandas as pd
 import os
 from config import config as args
 from create_model import function1
-import pandas
+from tqdm import tqdm
+import cv2
 
 # read the test image path
 file_name = 'test.pkl'
@@ -11,4 +12,14 @@ print(test.columns.values.tolist())
 image1_pth = test['image_1'].values.tolist()
 image2_pth = test['image_2'].values.tolist()
 
-function1(image1_pth, image2_pth)
+# function1(image1_pth, image2_pth)
+
+image_folder = args.image_folder  # path to folder containing images
+for file1, file2 in tqdm(image1_pth, image2_pth):
+
+    img = cv2.imread(file1)
+    if img is None:
+        print('None:', file1)
+    img2 = cv2.imread(file2)
+    if img2 is None:
+        print('None:', file2)
