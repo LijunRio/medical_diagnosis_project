@@ -227,7 +227,8 @@ def create_model(train_flag=False):
     model = tf.keras.Model(inputs=[image1, image2, caption], outputs=output)
     if not train_flag:
         model_filename = 'Encoder_Decoder_global_attention.h5'
-        model_save = model_filename
+        model_save = os.path.join(args.modelSave_path, model_filename)
+        print('load_model_from:', model_save)
         model.load_weights(model_save)
         return model, tokenizer
 
@@ -300,7 +301,7 @@ def train():
     # verbose=2每个epoch输出一行记录
     my_callbacks = [tf.keras.callbacks.EarlyStopping(patience=5, verbose=2),  # patience 训练将停止后没有改进的epoch数
                     tf.keras.callbacks.ModelCheckpoint(filepath=os.path.join(args.modelSave_path,
-                                                                            'Encoder_Decoder_global_attention.h5'),
+                                                                             'Encoder_Decoder_global_attention.h5'),
                                                        save_best_only=True,
                                                        save_weights_only=True, verbose=2),
                     tf.keras.callbacks.TensorBoard(histogram_freq=1, log_dir=os.path.join(args.modelSave_path,
@@ -397,7 +398,6 @@ def function2(true_caption, image1, image2):
         predicted = predicted.append(caption, ignore_index=True)
 
     return predicted
-
 
 # train()
 # create_chexnet()
