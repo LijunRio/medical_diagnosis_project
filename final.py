@@ -16,13 +16,15 @@ st.markdown("\nThis app will generate impression part of an X-ray report.\nYou c
             "view and side view of chest of the same individual.")
 st.markdown("The 2nd X-ray is optional.")
 
-col1, col2 = st.beta_columns(2)
+# col1, col2 = st.beta_columns(2)
+col1, col2 = st.columns(2)
 image_1 = col1.file_uploader("X-ray 1", type=['png', 'jpg', 'jpeg'])
 image_2 = None
 if image_1:
     image_2 = col2.file_uploader("X-ray 2 (optional)", type=['png', 'jpg', 'jpeg'])
 
-col1, col2 = st.beta_columns(2)
+# col1, col2 = st.beta_columns(2)
+col1, col2 = st.columns(2)
 predict_button = col1.button('Predict on uploaded files')
 test_data = col2.button('Predict on sample data')
 
