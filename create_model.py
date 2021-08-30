@@ -447,4 +447,4 @@ def get_detail_result(image1, image2, true_caption, model_tokenizer=None):
 
 
 # train()
-create_model(draw_model=True)
+# create_model(draw_model=True)
