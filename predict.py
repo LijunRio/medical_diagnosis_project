@@ -25,6 +25,8 @@ impression_list = test['impression'].values.tolist()
 #     if img2 is None:
 #         print('None:', file2)
 
+image2_pth = image2_pth[:10]
+image1_pth = image1_pth[:10]
 function1(image1_pth, image2_pth)
 
 # result = get_detail_result(image1_pth, image2_pth, impression_list)
