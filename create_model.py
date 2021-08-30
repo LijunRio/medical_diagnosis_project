@@ -341,11 +341,12 @@ def predict1(image1, image2=None, model_tokenizer=None):
     except:
         return print("Must be an image")
 
-    if model_tokenizer == None:
+    if model_tokenizer is None:
         model, tokenizer = create_model()
     else:
         model, tokenizer = model_tokenizer[0], model_tokenizer[1]
     predicted_caption = greedy_search_predict(image1, image2, model, tokenizer)
+    print('prdict1:', predicted_caption)
 
     return predicted_caption
 
