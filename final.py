@@ -5,12 +5,14 @@ import time
 from PIL import Image
 import create_model as cm
 
-st.title("Chest X-ray Report Generator")
+# st.title("Chest X-ray Report Generator")
+st.title("医学报告诊断")
 
 
-st.markdown("\nThis app will generate impression part of an X-ray report.\nYou can upload 2 X-rays that are front "
-            "view and side view of chest of the same individual.")
-st.markdown("The 2nd X-ray is optional.")
+# st.markdown("\nThis app will generate impression part of an X-ray report.\nYou can upload 2 X-rays that are front "
+#             "view and side view of chest of the same individual.")
+st.markdown("\n给定X光会生成报告的impression部分.\n你需要上传两张X光图像，一张正位片，一张侧位片 ")
+st.markdown("侧位片没有的时候可以为空.")
 
 
 col1, col2 = st.columns(2)
@@ -20,8 +22,9 @@ if image_1:
     image_2 = col2.file_uploader("X-ray 2 (optional)", type=['png', 'jpg', 'jpeg'])
 
 col1, col2 = st.columns(2)
-predict_button = col1.button('Predict on uploaded files')
-test_data = col2.button('Predict on sample data')
+# predict_button = col1.button('Predict on uploaded files')
+predict_button = col1.button('使用上传图片进行预测')
+test_data = col2.button('使用样本图片进行预测')
 
 
 @st.cache

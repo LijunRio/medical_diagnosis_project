@@ -386,7 +386,7 @@ def function1(image1, image2, model_tokenizer=None):
     predicted_caption = []
     for i1, i2 in zip(image1, image2):
         caption = predict1(i1, i2, model_tokenizer)
-        print(caption)
+        # print(caption)
         predicted_caption.append(caption)
 
     return predicted_caption
