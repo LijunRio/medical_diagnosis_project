@@ -335,6 +335,8 @@ def predict1(image1, image2=None, model_tokenizer=None):
     if image2 is None:  # if only 1 image file is given
         image2 = image1
 
+    # 注意
+    # 如果是使用APP的时候需要注释
     # try:
     #     image1 = cv2.imread(image1, cv2.IMREAD_UNCHANGED) / 255
     #     image2 = cv2.imread(image2, cv2.IMREAD_UNCHANGED) / 255
