@@ -199,7 +199,7 @@ class decoder(tf.keras.Model):
         return self.output_array
 
 
-def create_model(train_flag=False):
+def create_model(train_flag=False, draw_model=False):
     """
   creates the best model ie the attention model
   and returns the model after loading the weights
@@ -226,6 +226,10 @@ def create_model(train_flag=False):
 
     output = decoder(max_pad, embedding_dim, dense_dim, batch_size, vocab_size)(encoder_output, caption)
     model = tf.keras.Model(inputs=[image1, image2, caption], outputs=output)
+    if draw_model:
+        model_png = args.modelPng_save
+        tf.keras.utils.plot_model(model, to_file=model_png, show_shapes=True)
+
     if not train_flag:
         model_filename = 'Encoder_Decoder_global_attention.h5'
         model_save = os.path.join(args.modelSave_path, model_filename)
@@ -441,5 +445,6 @@ def get_detail_result(image1, image2, true_caption, model_tokenizer=None):
                                                               'bleu1', 'bleu2', 'bleu3', 'bleu4']), ignore_index=True)
     return result
 
+
 # train()
-# create_chexnet()
+create_model(draw_model=True)
